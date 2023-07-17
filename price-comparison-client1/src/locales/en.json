@@ -1,0 +1,13 @@
+{
+  "main": {
+    "add_offer": "add offer",
+    "description": "Search price information of consumer products and compare offers from different shops",
+    "found_products": "Found products",
+    "login": "Login",
+    "offers": "Offers",
+    "products": "Products",
+    "register": "Register",
+    "title": "Location-based Product Price Comparison",
+    "users": "Users"
+  }
+}

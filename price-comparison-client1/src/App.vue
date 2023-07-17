@@ -1,6 +1,7 @@
 <template>
     <div class="container-fluid h-100 row">
         <main class="h-100 col-xl-4 col-lg-5 col-md-6 col-sm-7 bg-white">
+            <locale-changer/>
             <router-view/>
         </main>
     </div>
@@ -12,8 +13,9 @@ import { Options, Vue } from 'vue-class-component'
 import router from '@/router/index'
 import { useIdentityStore } from '@/stores/identity'
 import Logger from '@/util/logger'
-import { initializeApp } from "firebase/app";
-import { getMessaging, getToken } from "firebase/messaging";
+import { initializeApp } from 'firebase/app'
+import { getMessaging, getToken } from 'firebase/messaging'
+import LocaleChanger from '@/components/LocaleChanger.vue'
 
 /**
  * @author Ahto Jalak
@@ -21,6 +23,7 @@ import { getMessaging, getToken } from "firebase/messaging";
  */
 @Options({
     components: {
+        LocaleChanger
     },
 })
 export default class App extends Vue {

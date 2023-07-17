@@ -1,0 +1,13 @@
+{
+  "main": {
+    "add_offer": "lisa pakkumine",
+    "description": "Otsi tarbekaupade hinnainfot ja võrdle erinevate poodide hinnapakkumisi",
+    "found_products": "Leitud tooteid",
+    "login": "Logi sisse",
+    "offers": "Pakkumised",
+    "products": "Tooted",
+    "register": "Registreeri",
+    "title": "Asukohapõhine kaupade hinnavõrdluse",
+    "users": "Kasutajad"
+  }
+}

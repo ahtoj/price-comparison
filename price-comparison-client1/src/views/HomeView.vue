@@ -11,10 +11,10 @@
             <div v-if="getKeyword().trim().length >= 3">
                 <div class="text-right">
                     <button @click="addOffer" class="border-0">
-                        <i class="bi bi-database-add"></i> lisa pakkumine
+                        <i class="bi bi-database-add"></i> {{ $t("main.add_offer") }}
                     </button>
                 </div>
-                <small>Leitud tooteid: {{ getProductList().length }}</small>
+                <small>{{ $t("main.found_products") }}: {{ getProductList().length }}</small>
                 <div v-for="item of getProductList()" :key="item.id" class="row">
                     <div class="col-3 p-2">
                         <img :src="getProductImageByBarcode(item.barcode)" alt="" height="86"/>
@@ -99,10 +99,10 @@
     </div>
     <div class="row" v-if="!isAuthenticated">
         <div class="col-12 bg-light custom-home-size">
-            <h1 class="custom-home-head">Asukohapõhine tarbekaupade hinnavõrdluse veebirakendus</h1>
+            <h1 class="custom-home-head">{{ $t("main.title") }}</h1>
             <div class="row">
                 <div class="col-6">
-                    Kasutajad
+                    {{ $t("main.users") }}
                 </div>
                 <div class="col-6">
                     {{ getStats().numOfUsers }}
@@ -110,7 +110,7 @@
             </div>
             <div class="row">
                 <div class="col-6">
-                    Tooted
+                    {{ $t("main.products") }}
                 </div>
                 <div class="col-6">
                     {{ getStats().numOfProducts }}
@@ -118,7 +118,7 @@
             </div>
             <div class="row">
                 <div class="col-6">
-                    Pakkumised
+                    {{ $t("main.offers") }}
                 </div>
                 <div class="col-6">
                     {{ getStats().numOfPriceUpdates }}
@@ -133,12 +133,12 @@
         <div class="row fixed-bottom p-3 col-xl-4 col-lg-5 col-md-6 col-sm-7">
             <div class="col-6">
                 <RouterLink :to="{ name: 'identity-login'}" class="btn btn-secondary btn-lg w-100">
-                    Logi sisse
+                    {{ $t("main.login") }}
                 </RouterLink>
             </div>
             <div class="col-6">
                 <RouterLink :to="{ name: 'identity-register'}" class="btn btn-primary btn-lg w-100">
-                    Registreeri
+                    {{ $t("main.register") }}
                 </RouterLink>
             </div>
         </div>
