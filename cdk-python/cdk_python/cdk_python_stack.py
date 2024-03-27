@@ -38,29 +38,27 @@ class CdkPythonStack(Stack):
         )
 
         self.ecs_cluster = ContainerServiceStack(
-            self, "sl-ecs-dev",
+            self, "sl-public3",
             vpc=self.vpc_dev,
             subnets=self.public_subnets,
-            sg=ec2.SecurityGroup.from_security_group_id(
-                self, f"default-ecs-cluster-sg", env_vars['cluster_sg_name'], mutable=False),
             main_tag="latest-prod",
             key_pair="slkey",
+            cert=acm.Certificate.from_certificate_arn(
+                self, 'default-cert-eu', f'{env_vars["cert_arn_eu"]}'),
             env={
-                'name': 'prod',
-                'service_desired_count': 1,
                 'region': env_vars['region'],
                 'account': env_vars['account'],
-                'file_system_id': env_vars['file_system_id'],
             },
+            domain_name=env_vars['domain_name'],
         )
 
         self.website = WebsiteStack(
             self, "price-comparison-web",
-            vpcId=env_vars['vpc_name'],
             cert=acm.Certificate.from_certificate_arn(
                 self, 'default-cert-us', f'{env_vars["cert_arn"]}'),
-            user={
-                'name': env_vars["user_name"],
-                'arn': env_vars["user_arn"],
+            env={
+                'region': env_vars['region'],
+                'account': env_vars['account'],
             },
+            domain_name=env_vars['domain_name'],
         )

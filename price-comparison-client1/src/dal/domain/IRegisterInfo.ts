@@ -9,4 +9,6 @@ export interface IRegisterInfo {
     lastname: string
     password: string
     consent: boolean
+    provider: string
+    credential: string
 }

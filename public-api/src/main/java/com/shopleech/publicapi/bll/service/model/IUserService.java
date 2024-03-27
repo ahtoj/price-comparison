@@ -3,6 +3,7 @@ package com.shopleech.publicapi.bll.service.model;
 import com.shopleech.publicapi.domain.User;
 import com.shopleech.publicapi.dto.v1.UserRegisterDTO;
 import com.shopleech.publicapi.dto.v1.UserTokenDTO;
+import io.jsonwebtoken.Claims;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
@@ -30,4 +31,6 @@ public interface IUserService extends UserDetailsService {
     Integer remove(Integer id) throws Exception;
 
     User getCurrentUser();
+
+    Claims validateGoogleToken(String credential);
 }

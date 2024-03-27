@@ -5,4 +5,6 @@
 export interface ILoginInfo {
     email: string
     password: string
+    provider: string
+    credential: string
 }

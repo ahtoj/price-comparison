@@ -9,13 +9,8 @@ phases:
     commands:
       - if [ -d price-comparison-client1 ]; then cd price-comparison-client1/; fi
       - npm run build
+      - aws s3 sync ./dist s3://s3-eu-west-1.amazonaws.com/price-comparison-web
 artifacts:
-  secondary-artifacts:
-    artifact1:
-      files:
-        - '**/*'
-      base-directory: 'price-comparison-client1/dist'
-    artifact2:
-      files:
-        - '**/*'
-      base-directory: 'dist'
+  files:
+    - 'price-comparison-client1/dist/**/*'
+    - 'dist/**/*'

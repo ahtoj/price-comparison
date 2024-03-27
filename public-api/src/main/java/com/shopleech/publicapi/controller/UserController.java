@@ -1,14 +1,15 @@
 package com.shopleech.publicapi.controller;
 
-import com.shopleech.publicapi.bll.service.AccountService;
-import com.shopleech.publicapi.bll.service.CustomerService;
 import com.shopleech.publicapi.bll.service.UserService;
 import com.shopleech.publicapi.bll.util.JwtTokenUtil;
 import com.shopleech.publicapi.dto.v1.UserLoginDTO;
 import com.shopleech.publicapi.dto.v1.UserRefreshDTO;
 import com.shopleech.publicapi.dto.v1.UserRegisterDTO;
 import com.shopleech.publicapi.dto.v1.UserDTO;
+import com.shopleech.publicapi.dto.v1.GoogleUserRegisterDTO;
+import com.shopleech.publicapi.dto.v1.GoogleUserLoginDTO;
 import com.shopleech.publicapi.dto.v1.mapper.UserMapper;
+import io.jsonwebtoken.Claims;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * @author Ahto Jalak
@@ -55,21 +57,35 @@ public class UserController {
 
         Map<String, Object> responseMap = new HashMap<>();
         try {
+            // Google token validation
+            if (Objects.equals(request.getProvider(), "G")) {
+                Claims claims = userService.validateGoogleToken(request.getCredential());
+                if (claims == null) {
+                    responseMap.put("error", true);
+                    responseMap.put("message", "invalid_credentials");
+                    return ResponseEntity.status(401).body(responseMap);
+                }
+                request.setEmail(claims.get("email", String.class));
+                request.setFirstname(claims.get("given_name", String.class));
+                request.setLastname(claims.get("family_name", String.class));
+            }
+
             var register = userService.register(request);
-            if (register != null) {
-                responseMap.put("error", false);
-                responseMap.put("message", "registration_success");
-                responseMap.put("token", register.getToken());
-                responseMap.put("refreshToken", "");
-                responseMap.put("firstname", "");
-                responseMap.put("lastname", "");
-                responseMap.put("roles", "");
-                return ResponseEntity.ok(responseMap);
-            } else {
+            if (register == null) {
                 responseMap.put("error", true);
                 responseMap.put("message", "invalid_input");
                 return ResponseEntity.status(401).body(responseMap);
             }
+
+            responseMap.put("error", false);
+            responseMap.put("message", "registration_success");
+            responseMap.put("token", register.getToken());
+            responseMap.put("refreshToken", "");
+            responseMap.put("email", request.getEmail());
+            responseMap.put("firstname", request.getFirstname());
+            responseMap.put("lastname", request.getLastname());
+            responseMap.put("roles", "");
+            return ResponseEntity.ok(responseMap);
         } catch (DisabledException e) {
             responseMap.put("error", true);
             responseMap.put("message", "user_is_disabled");
@@ -102,26 +118,39 @@ public class UserController {
 
         Map<String, Object> responseMap = new HashMap<>();
         try {
-            Authentication auth = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
-            if (auth.isAuthenticated()) {
-                logger.info("Logged In");
-                UserDetails userDetails = userService.loadUserByUsername(request.getEmail());
-                String token = jwtTokenUtil.generateToken(userDetails);
-
-                responseMap.put("error", false);
-                responseMap.put("message", "logged_in_success");
-                responseMap.put("token", token);
-                responseMap.put("refreshToken", "");
-                responseMap.put("firstname", "");
-                responseMap.put("lastname", "");
-                responseMap.put("roles", "");
-                return ResponseEntity.ok(responseMap);
+            // Google token validation
+            if (Objects.equals(request.getProvider(), "G")) {
+                Claims claims = userService.validateGoogleToken(request.getCredential());
+                if (claims == null) {
+                    responseMap.put("error", true);
+                    responseMap.put("message", "invalid_credentials");
+                    return ResponseEntity.status(401).body(responseMap);
+                }
+                request.setEmail(claims.get("email", String.class));
             } else {
-                responseMap.put("error", true);
-                responseMap.put("message", "invalid_credentials");
-                return ResponseEntity.status(401).body(responseMap);
+                // Everything else
+                Authentication auth = authenticationManager.authenticate(
+                        new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
+                if (!auth.isAuthenticated()) {
+                    responseMap.put("error", true);
+                    responseMap.put("message", "invalid_credentials");
+                    return ResponseEntity.status(401).body(responseMap);
+                }
             }
+
+            logger.info("Logged In");
+
+            UserDetails userDetails = userService.loadUserByUsername(request.getEmail());
+            String token = jwtTokenUtil.generateToken(userDetails);
+
+            responseMap.put("error", false);
+            responseMap.put("message", "logged_in_success");
+            responseMap.put("token", token);
+            responseMap.put("refreshToken", "");
+            responseMap.put("firstname", "");
+            responseMap.put("lastname", "");
+            responseMap.put("roles", "");
+            return ResponseEntity.ok(responseMap);
         } catch (DisabledException e) {
             responseMap.put("error", true);
             responseMap.put("message", "user_is_disabled");

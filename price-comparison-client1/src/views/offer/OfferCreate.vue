@@ -1,94 +1,3 @@
-<template>
-    <Header v-if="isAuthenticated" title="" back="home"/>
-
-    <h4>Uue pakkumise lisamine</h4>
-    <div v-if="errorMsg != null" class="text-danger validation-summary-errors" data-valmsg-summary="true">
-        <ul>
-            <li>{{ errorMsg }}</li>
-        </ul>
-    </div>
-    <div v-if="id !== undefined">
-        <div class="row p-3">
-            <div class="col-12 text-center">
-                <img :src="getProductImageByBarcode(getProduct().barcode)" alt="" height="164"/>
-            </div>
-        </div>
-        <div class="row p-3">
-            <div class="col-4 p-2">Toote nimi</div>
-            <div class="col-8 p-2">{{ getProduct().name }}</div>
-        </div>
-        <div class="row p-3">
-            <div class="col-4 p-2">Triipkood</div>
-            <div class="col-8 p-2">{{ getProduct().barcode }}</div>
-        </div>
-    </div>
-    <div v-if="id === undefined">
-        <div class="form-group">
-            <label class="col-4 p-2 control-label">Toote nimi</label>
-            <input type="text" class="col-8" v-model="name"/>
-        </div>
-        <div class="form-group row p-3">
-            <label class="col-4 p-2 control-label">Triipkood</label>
-            <div class="col-8 p-2">
-                <div class="input-group mb-3">
-                    <input v-model="barcode" type="text" class="form-control" aria-label="triipkood">
-                    <div class="input-group-append">
-                        <button class="btn btn-outline-secondary" @click="showScanner=!showScanner" type="button">
-                            <i class="bi bi-qr-code-scan"></i>
-                        </button>
-                    </div>
-                </div>
-                <div v-if="showScanner">
-                    <barcode-scanner :qrbox="100" :fps="10" @result="onScan"/>
-                </div>
-            </div>
-        </div>
-        <div class="form-group row p-3">
-            <div class="col-4 p-2 control-label">
-                <label>Toote pilt</label>
-            </div>
-            <div class="col-8 p-2">
-                <upload-image/>
-            </div>
-        </div>
-        <div class="form-group">
-            <label class="col-4 p-2 control-label">Kategooria</label>
-            <select class="col-8" v-model="categoryId">
-                <option v-for="option in getCategoryList()" v-bind:key="option.id" :value="option.id">
-                    {{ option.name }}
-                </option>
-            </select>
-        </div>
-    </div>
-    <div class="form-group">
-        <label class="col-4 p-2 control-label">Pood</label>
-        <select class="col-8" v-model="shopId">
-            <option v-for="option in getShopList()" v-bind:key="option.id" :value="option.id">
-                {{ option.name }} <span v-if="option.distance"> &nbsp; {{
-                    distanceUtil.round(option.distance)
-                }}km</span>
-            </option>
-        </select>
-    </div>
-    <div class="form-group">
-        <label class="col-4 p-2 control-label">Hind</label>
-        <input type="text" class="col-8" v-model="price" style="width: 100px;"/>
-    </div>
-    <div>
-        <div class="row">
-            <div class="col-4"></div>
-            <div class="col-6">
-                <input @click="submitClicked()" type="submit" value="Lisa pakkumine" class="btn btn-primary"/>
-            </div>
-            <div class="col-2">
-                <button @click="goToImports()">
-                    <i class="bi bi-filetype-xml"></i>
-                </button>
-            </div>
-        </div>
-    </div>
-</template>
-
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component'
 import { OfferService } from '@/bll/service/OfferService'
@@ -314,15 +223,15 @@ export default class OfferCreate extends Vue {
     }
 
     getCategoryImageByType (id: string) {
-        return `https://price-comparison-images.s3.eu-west-1.amazonaws.com/category/${id}.png`
+        return `/images/category/${id}.png`
     }
 
     getShopImageByType (url: string) {
-        return `https://price-comparison-images.s3.eu-west-1.amazonaws.com/shop/${url}`
+        return `/images/shop/${url}`
     }
 
     getProductImageByBarcode (id: string) {
-        return `https://price-comparison-images.s3.eu-west-1.amazonaws.com/product/${id}.jpg`
+        return `/images/product/${id}.jpg`
     }
 
     goToImports () {
@@ -338,3 +247,94 @@ export default class OfferCreate extends Vue {
     display: none;
 }
 </style>
+
+<template>
+    <Header v-if="isAuthenticated" title="" back="home"/>
+
+    <h4>Uue pakkumise lisamine</h4>
+    <div v-if="errorMsg != null" class="text-danger validation-summary-errors" data-valmsg-summary="true">
+        <ul>
+            <li>{{ errorMsg }}</li>
+        </ul>
+    </div>
+    <div v-if="id !== undefined">
+        <div class="row p-3">
+            <div class="col-12 text-center">
+                <img :src="getProductImageByBarcode(getProduct().barcode)" alt="" height="164"/>
+            </div>
+        </div>
+        <div class="row p-3">
+            <div class="col-4 p-2">Toote nimi</div>
+            <div class="col-8 p-2">{{ getProduct().name }}</div>
+        </div>
+        <div class="row p-3">
+            <div class="col-4 p-2">Triipkood</div>
+            <div class="col-8 p-2">{{ getProduct().barcode }}</div>
+        </div>
+    </div>
+    <div v-if="id === undefined">
+        <div class="form-group">
+            <label class="col-4 p-2 control-label">Toote nimi</label>
+            <input type="text" class="col-8" v-model="name"/>
+        </div>
+        <div class="form-group row p-3">
+            <label class="col-4 p-2 control-label">Triipkood</label>
+            <div class="col-8 p-2">
+                <div class="input-group mb-3">
+                    <input v-model="barcode" type="text" class="form-control" aria-label="triipkood">
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-secondary" @click="showScanner=!showScanner" type="button">
+                            <i class="bi bi-qr-code-scan"></i>
+                        </button>
+                    </div>
+                </div>
+                <div v-if="showScanner">
+                    <barcode-scanner :qrbox="100" :fps="10" @result="onScan"/>
+                </div>
+            </div>
+        </div>
+        <div class="form-group row p-3">
+            <div class="col-4 p-2 control-label">
+                <label>Toote pilt</label>
+            </div>
+            <div class="col-8 p-2">
+                <upload-image/>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-4 p-2 control-label">Kategooria</label>
+            <select class="col-8" v-model="categoryId">
+                <option v-for="option in getCategoryList()" v-bind:key="option.id" :value="option.id">
+                    {{ option.name }}
+                </option>
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-4 p-2 control-label">Pood</label>
+        <select class="col-8" v-model="shopId">
+            <option v-for="option in getShopList()" v-bind:key="option.id" :value="option.id">
+                {{ option.name }} <span v-if="option.distance"> &nbsp; {{
+                    distanceUtil.round(option.distance)
+                }}km</span>
+            </option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label class="col-4 p-2 control-label">Hind</label>
+        <input type="text" class="col-8" v-model="price" style="width: 100px;"/>
+    </div>
+    <div>
+        <div class="row">
+            <div class="col-4"></div>
+            <div class="col-6">
+                <input @click="submitClicked()" type="submit" value="Lisa pakkumine" class="btn btn-primary"/>
+            </div>
+            <div class="col-2">
+                <button @click="goToImports()">
+                    <i class="bi bi-filetype-xml"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</template>

@@ -90,7 +90,7 @@ export default class AlarmIndex extends Vue {
     }
 
     getProductImageByBarcode (id: string) {
-        return `https://price-comparison-images.s3.eu-west-1.amazonaws.com/product/${id}.jpg`
+        return `/images/product/${id}.jpg`
     }
 }
 

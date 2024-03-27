@@ -387,15 +387,15 @@ export default class ProductDetails extends Vue {
     }
 
     getCategoryImageByType (id: string) {
-        return `https://price-comparison-images.s3.eu-west-1.amazonaws.com/category/${id}.png`
+        return `/images/category/${id}.png`
     }
 
     getShopImageByType (url: string) {
-        return `https://price-comparison-images.s3.eu-west-1.amazonaws.com/shop/${url}`
+        return `/images/shop/${url}`
     }
 
     getProductImageByBarcode (id: string) {
-        return `https://price-comparison-images.s3.eu-west-1.amazonaws.com/product/${id}.jpg`
+        return `/images/product/${id}.jpg`
     }
 }
 </script>

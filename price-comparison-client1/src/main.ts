@@ -1,5 +1,6 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
+import GoogleSignInPlugin from 'vue3-google-signin'
 
 import App from './App.vue'
 import router from './router'
@@ -18,7 +19,14 @@ import 'leaflet/dist/images/marker-icon.png'
 import 'leaflet/dist/images/marker-icon-2x.png'
 import 'leaflet/dist/images/marker-shadow.png'
 
-createApp(App)
-    .use(createPinia())
+const app = createApp(App)
+
+if (process.env.NODE_ENV === 'production') {
+    app.use(GoogleSignInPlugin, {
+        clientId: process.env.GOOGLE_CLIENT_ID
+    })
+}
+
+app.use(createPinia())
     .use(router)
     .mount('#app')

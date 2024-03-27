@@ -6,18 +6,16 @@ import lombok.NoArgsConstructor;
 
 /**
  * @author Ahto Jalak
- * @since 04.02.2023
+ * @since 24.03.2024
  */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserRegisterDTO {
+public class GoogleUserRegisterDTO {
     private String invitation;
     private String firstname;
     private String lastname;
     private String email;
-    private String password;
-    private boolean consent;
-    private String provider;
     private String credential;
+    private boolean consent;
 }

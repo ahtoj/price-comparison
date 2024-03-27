@@ -3,6 +3,7 @@ package com.shopleech.publicapi.bll.service;
 import com.shopleech.publicapi.bll.MyUserDetails;
 import com.shopleech.publicapi.bll.service.model.IUserService;
 import com.shopleech.publicapi.bll.util.JwtTokenUtil;
+import com.shopleech.publicapi.bll.util.JwtValidator;
 import com.shopleech.publicapi.dal.repository.AccountRepository;
 import com.shopleech.publicapi.dal.repository.CustomerAccountRepository;
 import com.shopleech.publicapi.dal.repository.CustomerRepository;
@@ -11,8 +12,11 @@ import com.shopleech.publicapi.domain.Account;
 import com.shopleech.publicapi.domain.Customer;
 import com.shopleech.publicapi.domain.CustomerAccount;
 import com.shopleech.publicapi.domain.User;
+import com.shopleech.publicapi.dto.v1.GoogleUserRegisterDTO;
 import com.shopleech.publicapi.dto.v1.UserRegisterDTO;
 import com.shopleech.publicapi.dto.v1.UserTokenDTO;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +29,8 @@ import javax.security.auth.login.CredentialException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * @author Ahto Jalak
@@ -46,6 +52,8 @@ public class UserService implements IUserService {
     CustomerAccountRepository customerAccountRepository;
     @Autowired
     JwtTokenUtil jwtTokenUtil;
+    @Autowired
+    JwtValidator jwtValidator;
 
     public UserTokenDTO register(UserRegisterDTO request) throws Exception {
 
@@ -61,16 +69,13 @@ public class UserService implements IUserService {
             throw new Exception("user exists");
         }
 
-
-//        if (loadUserByUsername(request.getEmail()).isEnabled()) {
-//            throw new Exception("user is enabled");
-//        }
-
         var user = new User();
         user.setFirstname(request.getFirstname());
         user.setLastname(request.getLastname());
         user.setEmail(request.getEmail());
-        user.setPassword(new BCryptPasswordEncoder().encode(request.getPassword()));
+        if (!request.getPassword().isEmpty()) {
+            user.setPassword(new BCryptPasswordEncoder().encode(request.getPassword()));
+        }
         user.setEnabled(true);
 
         var customer = new Customer();
@@ -104,9 +109,9 @@ public class UserService implements IUserService {
         logger.info(customerAccountAdded.toString());
 
         var userDetails = loadUserByUsername(userAdded.getEmail());
-        String token = jwtTokenUtil.generateToken(userDetails);
 
-        return new UserTokenDTO(token, userAdded.getEmail());
+        return new UserTokenDTO(
+                jwtTokenUtil.generateToken(userDetails), userAdded.getEmail());
     }
 
     @Override
@@ -165,5 +170,23 @@ public class UserService implements IUserService {
             return getUserByUsername(username);
         }
         return null;
+    }
+
+    @Override
+    public Claims validateGoogleToken(String credential) {
+        // Signature check
+        if (!jwtValidator.validateToken(credential)) {
+            logger.info("Invalid signature");
+        }
+        // Access claims
+        Claims claims = Jwts.parser().parseClaimsJwt(credential).getBody();
+        String userId = claims.getSubject();
+        String userEmail = claims.get("email", String.class);
+        // email match
+        if (userEmail.isEmpty()) {
+            logger.info("Email missing");
+        }
+
+        return claims;
     }
 }

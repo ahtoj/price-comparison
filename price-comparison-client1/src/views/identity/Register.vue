@@ -1,3 +1,95 @@
+<script lang="ts">
+import { useIdentityStore } from '@/stores/identity'
+import { Options, Vue } from 'vue-class-component'
+import router from '@/router'
+import { IResponseMessage } from '@/dal/domain/IResponseMessage'
+import { IRegisterInfo } from '@/dal/domain/IRegisterInfo'
+import Logger from '@/util/logger'
+import { CredentialResponse } from "vue3-google-signin"
+
+/**
+ * @author Ahto Jalak
+ * @since 06.02.2023
+ */
+@Options({
+    components: {},
+    methods: {
+    },
+    props: {},
+    emits: [],
+})
+export default class Register extends Vue {
+    private logger = new Logger(Register.name)
+    private identityStore = useIdentityStore()
+    private loginWasOk: boolean | null = null
+    errorMsg: string | null = null
+    invitation = ''
+    email = ''
+    firstname = ''
+    lastname = ''
+    password = ''
+    passwordRepeat = ''
+    consent = false
+
+    handleLoginSuccess (response: CredentialResponse): void {
+        console.log("Access Token", response)
+
+        if (response.credential) {
+            const registerInfo: IRegisterInfo = {
+                invitation: "",
+                email: "",
+                password: "",
+                firstname: "",
+                lastname: "",
+                consent: true,
+                provider: "G",
+                credential: response.credential,
+            }
+            this.identityStore.registerUser(registerInfo)
+                .then((response: IResponseMessage) => {
+                    this.loginWasOk = response.data !== undefined
+                    if (this.loginWasOk) {
+                        router.push('/')
+                    } else {
+                        if (response.errorMsg != null) {
+                            this.errorMsg = response.errorMsg
+                        }
+                    }
+                })
+        }
+    }
+
+    handleLoginError (): void {
+        console.log("Login failed")
+    }
+
+    async registerClicked (): Promise<void> {
+        this.logger.info('submitClicked')
+        const registerInfo: IRegisterInfo = {
+            invitation: this.invitation,
+            email: this.email,
+            firstname: this.firstname,
+            lastname: this.lastname,
+            password: this.password,
+            consent: this.consent,
+            provider: "B",
+            credential: ""
+        }
+        this.identityStore.registerUser(registerInfo)
+            .then((response: IResponseMessage) => {
+                this.loginWasOk = response.data !== undefined
+                if (this.loginWasOk) {
+                    router.push('/')
+                } else {
+                    if (response.errorMsg != null) {
+                        this.errorMsg = response.errorMsg
+                    }
+                }
+            })
+    }
+}
+</script>
+
 <template>
     <RouterLink :to="{ name: 'home' }">
         <i class="bi bi-backspace"></i>
@@ -45,63 +137,15 @@
                         Registreeri
                     </button>
                 </div>
+                <div class="col-6">
+                     <GoogleSignInButton
+                        @success="handleLoginSuccess"
+                        @error="handleLoginError"
+                        text="continue_with"
+                    ></GoogleSignInButton>
+                </div>
             </div>
         </div>
     </div>
 
 </template>
-
-<script lang="ts">
-import { useIdentityStore } from '@/stores/identity'
-import { Options, Vue } from 'vue-class-component'
-import router from '@/router'
-import { IResponseMessage } from '@/dal/domain/IResponseMessage'
-import { IRegisterInfo } from '@/dal/domain/IRegisterInfo'
-import Logger from '@/util/logger'
-
-/**
- * @author Ahto Jalak
- * @since 06.02.2023
- */
-@Options({
-    components: {},
-    props: {},
-    emits: [],
-})
-export default class Register extends Vue {
-    private logger = new Logger(Register.name)
-    private identityStore = useIdentityStore()
-    private loginWasOk: boolean | null = null
-    private errorMsg: string | null = null
-    private invitation = ''
-    private email = ''
-    private firstname = ''
-    private lastname = ''
-    private password = ''
-    private passwordRepeat = ''
-    private consent = false
-
-    async registerClicked (): Promise<void> {
-        this.logger.info('submitClicked')
-        const registerInfo: IRegisterInfo = {
-            invitation: this.invitation,
-            email: this.email,
-            firstname: this.firstname,
-            lastname: this.lastname,
-            password: this.password,
-            consent: this.consent,
-        }
-        this.identityStore.registerUser(registerInfo)
-            .then((response: IResponseMessage) => {
-                this.loginWasOk = response.data !== undefined
-                if (this.loginWasOk) {
-                    router.push('/')
-                } else {
-                    if (response.errorMsg != null) {
-                        this.errorMsg = response.errorMsg
-                    }
-                }
-            })
-    }
-}
-</script>
