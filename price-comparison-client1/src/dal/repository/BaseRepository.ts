@@ -2,8 +2,8 @@ import httpCLient from '@/util/http-client'
 import { useIdentityStore } from '@/stores/identity'
 import type { AxiosError } from 'axios'
 import Logger from '@/util/logger'
-import { IServiceResult } from '@/bll/service/model/IServiceResult'
-import { IBaseRepository } from '@/dal/repository/model/IBaseRepository'
+import type { IServiceResult } from '@/bll/service/model/IServiceResult'
+import type { IBaseRepository } from '@/dal/repository/model/IBaseRepository'
 
 /**
  * @author Ahto Jalak
@@ -28,10 +28,10 @@ export class BaseRepository<TEntity> implements IBaseRepository<TEntity> {
                     Authorization: 'Bearer ' + this.identityStore.$state.jwt?.token
                 }
             })
-        } catch (e) {
+        } catch (e:any) {
             return {
                 status: (e as AxiosError).response?.status,
-                errorMsg: (e as AxiosError).response?.data.message,
+                errorMsg: e.response?.data.message,
             }
         }
 
@@ -51,10 +51,10 @@ export class BaseRepository<TEntity> implements IBaseRepository<TEntity> {
                         Authorization: 'Bearer ' + this.identityStore.$state.jwt?.token
                     }
                 })
-        } catch (e) {
+        } catch (e:any) {
             return {
                 status: (e as AxiosError).response?.status,
-                errorMsg: (e as AxiosError).response?.data.message,
+                errorMsg: e.response?.data.message,
             }
         }
 
@@ -74,10 +74,10 @@ export class BaseRepository<TEntity> implements IBaseRepository<TEntity> {
                     Authorization: 'Bearer ' + this.identityStore.$state.jwt?.token
                 }
             })
-        } catch (e) {
+        } catch (e:any) {
             return {
                 status: (e as AxiosError).response?.status,
-                errorMsg: (e as AxiosError).response?.data.message,
+                errorMsg: e.response?.data.message,
             }
         }
 
@@ -98,10 +98,10 @@ export class BaseRepository<TEntity> implements IBaseRepository<TEntity> {
                         Authorization: 'Bearer ' + this.identityStore.$state.jwt?.token
                     }
                 })
-        } catch (e) {
+        } catch (e:any) {
             return {
                 status: (e as AxiosError).response?.status,
-                errorMsg: (e as AxiosError).response?.data.message,
+                errorMsg: e.response?.data.message,
             }
         }
 
@@ -122,10 +122,10 @@ export class BaseRepository<TEntity> implements IBaseRepository<TEntity> {
                         Authorization: 'Bearer ' + this.identityStore.$state.jwt?.token
                     }
                 })
-        } catch (e) {
+        } catch (e:any) {
             return {
                 status: (e as AxiosError).response?.status,
-                errorMsg: (e as AxiosError).response?.data.message,
+                errorMsg: e.response?.data.message,
             }
         }
 

@@ -30,68 +30,76 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component'
 import { AlarmService } from '@/bll/service/AlarmService'
 import { useAlarmStore } from '@/stores/alarm'
 import Logger from '@/util/logger'
-import { IAlarm } from '@/dal/domain/IAlarm'
+import type { IAlarm } from '@/dal/domain/IAlarm'
 import Header from '@/components/Header.vue'
 import { IdentityService } from '@/bll/service/IdentityService'
 import router from '@/router'
+import {defineComponent, onMounted} from "vue";
 
 /**
  * @author Ahto Jalak
  * @since 06.02.2023
  */
-@Options({
+export default defineComponent({
     components: {
         Header
     },
     props: {},
     emits: [],
-})
-export default class AlarmIndex extends Vue {
-    private logger = new Logger(AlarmIndex.name)
-    private identityService = new IdentityService()
-    alarmStore = useAlarmStore()
-    alarmService = new AlarmService()
+    setup() {
+        const logger = new Logger("AlarmIndex")
+        const identityService = new IdentityService()
+        const alarmStore = useAlarmStore()
+        const alarmService = new AlarmService()
 
-    errorMsg: string | null = null
+        let errorMsg: string | null = null
 
-    async mounted (): Promise<void> {
-        this.logger.info('mounted')
-        const items = await this.alarmService.getAll()
-        this.alarmStore.$state.alarms = items.data as IAlarm[]
-    }
-
-    get isAuthenticated (): boolean {
-        return this.identityService.isAuthenticated()
-    }
-
-    getAlarm (): IAlarm[] {
-        return this.alarmStore.$state.alarms
-    }
-
-    addAlarm (productId: number) {
-        this.logger.info('addAlarm')
-        router.push('/alarm/create/' + productId)
-    }
-
-    clickRemove (alarmId: number) {
-        this.alarmService.delete(alarmId).then((item) => {
-            if (item.errorMsg !== undefined) {
-                this.errorMsg = item.errorMsg
-            } else {
-                if (item.data) {
-                    this.alarmStore.remove(item.data)
-                }
-            }
+        onMounted(async () => {
+            logger.info('mounted')
+            const items = await alarmService.getAll()
+            alarmStore.$state.alarms = items.data as IAlarm[]
         })
-    }
 
-    getProductImageByBarcode (id: string) {
-        return `/images/product/${id}.jpg`
-    }
-}
+        return {
+            logger,
+            identityService,
+            alarmStore,
+            alarmService,
+            errorMsg,
+        }
+    },
+    methods: {
+        isAuthenticated (): boolean {
+            return this.identityService.isAuthenticated()
+        },
 
+        getAlarm (): IAlarm[] {
+            return this.alarmStore.$state.alarms
+        },
+
+        addAlarm (productId: number) {
+            this.logger.info('addAlarm')
+            router.push('/alarm/create/' + productId)
+        },
+
+        clickRemove (alarmId: number) {
+            this.alarmService.delete(alarmId).then((item) => {
+                if (item.errorMsg !== undefined) {
+                    this.errorMsg = item.errorMsg
+                } else {
+                    if (item.data) {
+                        this.alarmStore.remove(item.data)
+                    }
+                }
+            })
+        },
+
+        getProductImageByBarcode (id: string) {
+            return `/images/product/${id}.jpg`
+        },
+    }
+})
 </script>

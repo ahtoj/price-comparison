@@ -1,12 +1,12 @@
 import { BaseRepository } from '@/dal/repository/BaseRepository'
-import { IUser } from '@/dal/domain/IUser'
-import { IServiceResult } from '@/bll/service/model/IServiceResult'
-import { ILoginInfo } from '@/dal/domain/ILoginInfo'
-import { IJwtResponse } from '@/dal/domain/IJwtResponse'
-import { IUserRepository } from '@/dal/repository/model/IUserRepository'
+import type { IUser } from '@/dal/domain/IUser'
+import type { IServiceResult } from '@/bll/service/model/IServiceResult'
+import type { ILoginInfo } from '@/dal/domain/ILoginInfo'
+import type { IJwtResponse } from '@/dal/domain/IJwtResponse'
+import type { IUserRepository } from '@/dal/repository/model/IUserRepository'
 import httpCLient from '@/util/http-client'
 import { AxiosError } from 'axios'
-import { IRegisterInfo } from '@/dal/domain/IRegisterInfo'
+import type { IRegisterInfo } from '@/dal/domain/IRegisterInfo'
 
 /**
  * @author Ahto Jalak
@@ -23,10 +23,10 @@ export class UserRepository extends BaseRepository<IUser> implements IUserReposi
         let response
         try {
             response = await httpCLient.post(`/${this._path}`, entity, {})
-        } catch (e) {
+        } catch (e:any) {
             return {
                 status: (e as AxiosError).response?.status,
-                errorMsg: (e as AxiosError).response?.data.error,
+                errorMsg: e.response?.data.error,
             }
         }
 
@@ -42,10 +42,10 @@ export class UserRepository extends BaseRepository<IUser> implements IUserReposi
         let response
         try {
             response = await httpCLient.post(`/${this._path}`, entity, {})
-        } catch (e) {
+        } catch (e:any) {
             return {
                 status: (e as AxiosError).response?.status,
-                errorMsg: (e as AxiosError).response?.data.error,
+                errorMsg: e.response?.data.error,
             }
         }
 

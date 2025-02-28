@@ -1,12 +1,11 @@
 import { defineStore } from 'pinia'
-import { IAlarm } from '@/dal/domain/IAlarm'
+import type { IAlarm } from '@/dal/domain/IAlarm'
 
 /**
  * @author Ahto Jalak
  * @since 06.02.2023
  */
-export const useAlarmStore = defineStore({
-    id: 'alarms',
+export const useAlarmStore = defineStore('alarms', {
     state: () => ({
         alarm: [] as IAlarm,
         alarms: [] as IAlarm[],

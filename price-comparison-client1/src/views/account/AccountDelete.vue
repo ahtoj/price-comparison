@@ -25,43 +25,52 @@
 <script lang="ts">
 import { AccountService } from '@/bll/service/AccountService'
 import { useAccountStore } from '@/stores/account'
-import { Options, Vue } from 'vue-class-component'
 import Logger from '@/util/logger'
+import {defineComponent} from "vue";
 
 /**
  * @author Ahto Jalak
  * @since 06.02.2023
  */
-@Options({
+export default defineComponent({
     components: {},
     props: {
         id: Number,
     },
     emits: [],
-})
-export default class AccountDelete extends Vue {
-    private logger = new Logger(AccountDelete.name)
-    id!: number
-    accountsStore = useAccountStore()
-    accountService = new AccountService()
+    setup(props: any) {
+        const logger = new Logger("AccountDelete")
+        const id = props.id
+        const accountsStore = useAccountStore()
+        const accountService = new AccountService()
 
-    errorMsg: string | null = null
+        let errorMsg: string | null = null
 
-    async submitClicked (): Promise<void> {
-        this.logger.info('submitClicked')
-
-        await this.accountService.delete(this.id)
-
-        /*
-        if (res.status >= 300) {
-            this.errorMsg = res.status + ' ' + res.errorMsg
-        } else {
-            this.accountsStore.$state.accounts =
-                await this.accountService.getAll()
-
-            this.$router.push('/accounts')
+        return {
+           logger,
+           id,
+           accountsStore,
+           accountService,
+           errorMsg,
         }
-         */
+    },
+    methods: {
+        async submitClicked (): Promise<void> {
+            this.logger.info('submitClicked')
+
+            await this.accountService.delete(this.id)
+
+            /*
+            if (res.status >= 300) {
+                this.errorMsg = res.status + ' ' + res.errorMsg
+            } else {
+                this.accountsStore.$state.accounts =
+                    await this.accountService.getAll()
+
+                this.$router.push('/accounts')
+            }
+             */
+        }
     }
-}
+})
 </script>

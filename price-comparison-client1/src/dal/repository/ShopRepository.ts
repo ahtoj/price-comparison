@@ -1,9 +1,9 @@
 import { BaseRepository } from '@/dal/repository/BaseRepository'
-import { IServiceResult } from '@/bll/service/model/IServiceResult'
-import { IShopRepository } from '@/dal/repository/model/IShopRepository'
+import type { IServiceResult } from '@/bll/service/model/IServiceResult'
+import type { IShopRepository } from '@/dal/repository/model/IShopRepository'
 import httpCLient from '@/util/http-client'
 import { AxiosError } from 'axios'
-import { IShop } from '@/dal/domain/IShop'
+import type { IShop } from '@/dal/domain/IShop'
 
 /**
  * @author Ahto Jalak
@@ -24,10 +24,10 @@ export class ShopRepository extends BaseRepository<IShop> implements IShopReposi
                     Authorization: 'Bearer ' + this.identityStore.$state.jwt?.token,
                 }
             })
-        } catch (e) {
+        } catch (e:any) {
             return {
                 status: (e as AxiosError).response?.status,
-                errorMsg: (e as AxiosError).response?.data.message,
+                errorMsg: e.response?.data.message,
             }
         }
 

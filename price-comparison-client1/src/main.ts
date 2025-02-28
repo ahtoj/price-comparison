@@ -9,7 +9,7 @@ import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-icons/font/bootstrap-icons.css'
 import 'leaflet/dist/leaflet.css'
 
-import 'jquery/src/jquery'
+//import 'jquery/src/jquery'
 import 'popper.js/dist/popper.js'
 import 'bootstrap/dist/js/bootstrap.js'
 import 'leaflet/dist/leaflet-src.js'
@@ -21,9 +21,9 @@ import 'leaflet/dist/images/marker-shadow.png'
 
 const app = createApp(App)
 
-if (process.env.NODE_ENV === 'production') {
+if (import.meta.env.NODE_ENV === 'production') {
     app.use(GoogleSignInPlugin, {
-        clientId: process.env.GOOGLE_CLIENT_ID
+        clientId: import.meta.env.GOOGLE_CLIENT_ID
     })
 }
 

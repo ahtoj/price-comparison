@@ -1,9 +1,9 @@
 import { BaseRepository } from '@/dal/repository/BaseRepository'
-import { IServiceResult } from '@/bll/service/model/IServiceResult'
+import type { IServiceResult } from '@/bll/service/model/IServiceResult'
 import httpCLient from '@/util/http-client'
 import { AxiosError } from 'axios'
-import { ICategory } from '@/dal/domain/ICategory'
-import { ICategoryRepository } from '@/dal/repository/model/ICategoryRepository'
+import type { ICategory } from '@/dal/domain/ICategory'
+import type { ICategoryRepository } from '@/dal/repository/model/ICategoryRepository'
 
 /**
  * @author Ahto Jalak
@@ -24,10 +24,10 @@ export class CategoryRepository extends BaseRepository<ICategory> implements ICa
                     Authorization: 'Bearer ' + this.identityStore.$state.jwt?.token,
                 }
             })
-        } catch (e) {
+        } catch (e : any) {
             return {
                 status: (e as AxiosError).response?.status,
-                errorMsg: (e as AxiosError).response?.data.message,
+                errorMsg: e.response?.data.message,
             }
         }
 

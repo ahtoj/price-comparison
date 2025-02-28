@@ -18,33 +18,38 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component'
 import { useFeatureStore } from '@/stores/feature'
 import { FeatureService } from '@/bll/service/FeatureService'
 import Logger from '@/util/logger'
+import {defineComponent, onMounted} from "vue";
 
 /**
  * @author Ahto Jalak
  * @since 06.02.2023
  */
-@Options({
+export default defineComponent({
     components: {},
     props: {
         id: String
     },
     emits: [],
+    setup(props: any) {
+        const logger = new Logger("FeatureDetails")
+        const id = props.id
+        const wishesStore = useFeatureStore()
+        const wishService = new FeatureService()
+        onMounted(() => {
+            logger.info('mounted')
+            // this.wishesStore.$state.feature =
+            //     await this.wishService.get(this.id)
+        })
+
+        return {
+            logger,
+            id,
+            wishesStore,
+            wishService,
+        }
+    },
 })
-export default class FeatureDetails extends Vue {
-    private logger = new Logger(FeatureDetails.name)
-    id!: string
-    wishesStore = useFeatureStore()
-    wishService = new FeatureService()
-
-    async mounted (): Promise<void> {
-        this.logger.info('mounted')
-        // this.wishesStore.$state.feature =
-        //     await this.wishService.get(this.id)
-    }
-}
-
 </script>

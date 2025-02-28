@@ -1,5 +1,5 @@
 <template>
-    <div>Hwee {{ hello }} {{ name }}</div>
+    <div>Hwee {{ hello }}</div>
     <ul>
         <li class="nav-item" v-if="!isAuthenticated">
             <router-link class="nav-link" to="/identity/register">Register</router-link>
@@ -16,18 +16,48 @@
     </ul>
 </template>
 
-<script>
-import { Options, Vue } from 'vue-class-component'
+<script lang="ts">
+import {defineComponent} from "vue";
+import router from "@/router";
+import {useIdentityStore} from "@/stores/identity.ts";
+import Logger from "@/util/logger.ts";
 
-@Options({
+export default defineComponent({
     components: {},
     props: {
         name: String, // string interface
-    }
+    },
+    setup(props: any) {
+        const hello = 'Greetings, ' + props.name;
+        const identityStore = useIdentityStore()
+        const logger = new Logger("Identity")
+
+        return {
+            hello,
+            identityStore,
+            logger,
+        }
+    },
+    methods: {
+        isAuthenticated (): boolean {
+            return this.identityStore.getJwt() !== null
+        },
+
+        logoutClicked (): void {
+            this.identityStore.clearJwt()
+            router.push('/')
+        },
+
+        refreshTokenClicked (): void {
+            this.identityStore.refreshUser().then(async value => {
+                if (value) {
+                    this.logger.info('token refresh')
+                }
+            })
+            router.push('/')
+        },
+    },
 })
-export default class Identity extends Vue {
-    hello = 'Greetings, ' + this.name
-}
 </script>
 
 <style scoped>

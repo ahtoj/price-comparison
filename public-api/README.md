@@ -15,6 +15,10 @@ Gradle 7.6
 #### add configuration to application.properties
 
 ```properties
+aws.access-key=
+aws.access-secret-key=
+google.oauth2.clientId=
+google.oauth2.clientSecret=
 spring.datasource.url=jdbc:postgresql://localhost:5432/jpa_demo
 spring.datasource.username=
 spring.datasource.password=
@@ -25,7 +29,7 @@ spring.datasource.hikari.schema=public
 
 ```
 flyway {
-    url = 'jdbc:postgresql://mmdb.shopleech.com:9097/jpa_demo'
+    url = 'jdbc:postgresql://localhost:5432/jpa_demo'
     user = ''
     password = ''
     schemas = ['public']

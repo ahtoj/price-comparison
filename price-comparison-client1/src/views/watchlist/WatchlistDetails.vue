@@ -18,35 +18,44 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component'
 import { WatchlistService } from '@/bll/service/WatchlistService'
 import { useWatchlistStore } from '@/stores/watchlist'
 import Logger from '@/util/logger'
-import { IWatchlist } from '@/dal/domain/IWatchlist'
+import type { IWatchlist } from '@/dal/domain/IWatchlist'
+import {defineComponent, onMounted} from "vue";
 
 /**
  * @author Ahto Jalak
  * @since 06.02.2023
  */
-@Options({
+export default defineComponent({
     components: {},
     props: {
         id: Number,
     },
     emits: [],
-})
-export default class WatchlistDetails extends Vue {
-    private logger = new Logger(WatchlistDetails.name)
+    setup (props) {
+        const logger = new Logger("WatchlistDetails")
 
-    id!: number
-    watchlistStore = useWatchlistStore()
-    watchlistService = new WatchlistService()
+        const id = props.id
+        const watchlistStore = useWatchlistStore()
+        const watchlistService = new WatchlistService()
 
-    async mounted (): Promise<void> {
-        this.logger.info('mounted')
-        const item = await this.watchlistService.get(this.id)
-        this.watchlistStore.$state.watchlist = item.data as IWatchlist
+        onMounted(async () => {
+            logger.info('mounted')
+            if (id) {
+                const item = await watchlistService.get(id)
+                watchlistStore.$state.watchlist = item.data as IWatchlist
+            }
+        })
+
+        return {
+            id,
+            watchlistStore,
+            watchlistService,
+            logger,
+        }
     }
-}
+})
 
 </script>

@@ -18,36 +18,43 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component'
 import { RoleService } from '@/bll/service/RoleService'
 import { useRoleStore } from '@/stores/role'
 import Logger from '@/util/logger'
-import { IWatchlist } from '@/dal/domain/IWatchlist'
+import type { IWatchlist } from '@/dal/domain/IWatchlist'
+import {defineComponent, onMounted} from "vue";
 
 /**
  * @author Ahto Jalak
  * @since 06.02.2023
  */
-@Options({
+export default defineComponent({
     components: {},
     props: {
         id: Number,
     },
     emits: [],
+    setup(props : any) {
+        const id = props.id
+        const logger = new Logger("RoleDetails")
+
+        const wishesStore = useRoleStore()
+        const wishService = new RoleService()
+
+        onMounted(async() => {
+            logger.info('mounted')
+            const item = await wishService.get(id)
+            wishesStore.$state.role = item.data as IWatchlist
+        })
+
+        return {
+            logger,
+            id,
+            wishesStore,
+            wishService,
+        }
+    },
+
 })
-export default class RoleDetails extends Vue {
-    id!: number
-
-    private logger = new Logger(RoleDetails.name)
-
-    wishesStore = useRoleStore()
-    wishService = new RoleService()
-
-    async mounted (): Promise<void> {
-        this.logger.info('mounted')
-        const item = await this.wishService.get(this.id)
-        this.wishesStore.$state.role = item.data as IWatchlist
-    }
-}
 
 </script>

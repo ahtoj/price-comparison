@@ -10,22 +10,27 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component'
 import Logger from '@/util/logger'
+import {defineComponent} from "vue";
 
 /**
  * @author Ahto Jalak
  * @since 06.02.2023
  */
-@Options({
+export default defineComponent({
     components: {},
     props: {
         id: String
     },
     emits: [],
+    setup(props) {
+        const logger = new Logger("PriceEdit")
+        const id = props.id
+
+        return {
+            logger,
+            id,
+        }
+    },
 })
-export default class PriceEdit extends Vue {
-    private logger = new Logger(PriceEdit.name)
-    id!: string
-}
 </script>

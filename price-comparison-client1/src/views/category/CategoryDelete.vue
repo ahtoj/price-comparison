@@ -25,45 +25,54 @@
 <script lang="ts">
 import { CategoryService } from '@/bll/service/CategoryService'
 import { useCategoryStore } from '@/stores/category'
-import { Options, Vue } from 'vue-class-component'
 import Logger from '@/util/logger'
+import {defineComponent} from "vue";
 
 /**
  * @author Ahto Jalak
  * @since 06.02.2023
  */
-@Options({
+export default defineComponent({
     components: {},
     props: {
         id: String
     },
     emits: [],
-})
-export default class CategoryDelete extends Vue {
-    private logger = new Logger(CategoryDelete.name)
-    id!: string
-    categoriesStore = useCategoryStore()
-    categoryService = new CategoryService()
+    setup(props) {
+        const logger = new Logger("CategoryDelete")
+        const id = props.id
+        const categoriesStore = useCategoryStore()
+        const categoryService = new CategoryService()
 
-    errorMsg: string | null = null
+        let errorMsg: string | null = null
 
-    submitClicked (): void {
-        this.logger.info('submitClicked')
-
-        // this.categoryService.delete(this.id).then(() => {
-        //     router.push('/')
-        // })
-
-        /*
-        if (res.status >= 300) {
-            this.errorMsg = res.status + ' ' + res.errorMsg
-        } else {
-            this.categoriesStore.$state.categories =
-                await this.categoryService.getAll()
-
-            this.$router.push('/categories')
+        return {
+            logger,
+            id,
+            categoriesStore,
+            categoryService,
+            errorMsg,
         }
-         */
+    },
+    methods: {
+        submitClicked (): void {
+            this.logger.info('submitClicked')
+
+            // this.categoryService.delete(this.id).then(() => {
+            //     router.push('/')
+            // })
+
+            /*
+            if (res.status >= 300) {
+                this.errorMsg = res.status + ' ' + res.errorMsg
+            } else {
+                this.categoriesStore.$state.categories =
+                    await this.categoryService.getAll()
+
+                this.$router.push('/categories')
+            }
+             */
+        }
     }
-}
+})
 </script>

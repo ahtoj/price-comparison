@@ -25,41 +25,50 @@
 <script lang="ts">
 import { CustomerService } from '@/bll/service/CustomerService'
 import { useCustomerStore } from '@/stores/customer'
-import { Options, Vue } from 'vue-class-component'
 import Logger from '@/util/logger'
+import router from "@/router";
+import {defineComponent} from "vue";
 
 /**
  * @author Ahto Jalak
  * @since 06.02.2023
  */
-@Options({
+export default defineComponent({
     components: {},
     props: {},
     emits: [],
-})
-export default class CustomerCreate extends Vue {
-    private logger = new Logger(CustomerCreate.name)
-    customersStore = useCustomerStore()
-    customerService = new CustomerService()
-    // customerService = new CustomerService()
+    setup() {
+        const logger = new Logger("CustomerCreate")
+        const customersStore = useCustomerStore()
+        const customerService = new CustomerService()
 
-    errorMsg: string | null = null
+        let errorMsg = ""
 
-    async submitClicked (): Promise<void> {
-        this.logger.info('submitClicked')
+        return {
+            logger,
+            customersStore,
+            customerService,
+            errorMsg,
+        }
+    },
+    methods: {
+        async submitClicked (): Promise<void> {
+            this.logger.info('submitClicked')
 
-        const res = await this.customerService.add(
-            {}
-        )
+            const res = await this.customerService.add(
+                {}
+            )
 
-        if (res.status == null || res.status >= 300) {
-            this.errorMsg = res.status + ' ' + res.errorMsg
-        } else {
-            // this.customersStore.$state.customers =
-            //     await this.customerService.getAll()
+            if (res.status == null || res.status >= 300) {
+                this.errorMsg = res.status + ' ' + res.errorMsg
+            } else {
+                // this.customersStore.$state.customers =
+                //     await this.customerService.getAll()
 
-            this.$router.push('/customers')
+                await router.push('/customers')
+            }
         }
     }
-}
+
+})
 </script>

@@ -44,57 +44,70 @@
 
 <script lang="ts">
 import { ProductService } from '@/bll/service/ProductService'
-import { Options, Vue } from 'vue-class-component'
 import Logger from '@/util/logger'
 import { IdentityService } from '@/bll/service/IdentityService'
-import { IProduct } from '@/dal/domain/IProduct'
+import type { IProduct } from '@/dal/domain/IProduct'
+import {defineComponent, onMounted} from "vue";
 
 /**
  * @author Ahto Jalak
  * @since 06.02.2023
  */
-@Options({
+export default defineComponent({
     components: {},
     props: {
         barcode: String
     },
     emits: [],
-})
-export default class ProductIndex extends Vue {
-    barcode: string | null = null
-    products: IProduct[] | null = null
+    setup() {
+        const barcode: string | null = null
+        const products: IProduct[] | null = null
 
-    private logger = new Logger(ProductIndex.name)
-    private productService = new ProductService()
-    private identityService = new IdentityService()
+        const logger = new Logger("ProductIndex")
+        const productService = new ProductService()
+        const identityService = new IdentityService()
+
+        onMounted(() => {
+            // this.logger.info('mounted')
+            // if (this.barcode) {
+            //     this.keyword = this.barcode
+            //     this.productService.setKeyword(this.barcode)
+            // }
+            // const items = await this.productService.getAllByKeyword({ keyword: this.keyword } as ISearchItem)
+            // this.products = items.data as IProduct[]
+            // this.productCount = this.productService.size()
+        })
+
+        return {
+            logger,
+            barcode,
+            products,
+            productService,
+            identityService,
+            keyword: '',
+            productCount: 0,
+        }
+    },
+    methods: {
+        async searchProductClicked (): Promise<void> {
+            // await router.push({
+            //     name: 'product',
+            //     params: { keyword: this.keyword }
+            // })
+            // const items = await this.productService.getAllByKeyword({ keyword: this.keyword } as ISearchItem)
+            // this.products = items.data as IProduct[]
+            // this.productCount = this.productService.size()
+        },
+
+        getProductImageByBarcode (id: string) {
+            return `/images/product/${id}.jpg`
+        }
+    }
 
     // keyword = this.productService.getKeyword()
     // productCount = this.productService.size()
 
-    async searchProductClicked (): Promise<void> {
-        // await router.push({
-        //     name: 'product',
-        //     params: { keyword: this.keyword }
-        // })
-        // const items = await this.productService.getAllByKeyword({ keyword: this.keyword } as ISearchItem)
-        // this.products = items.data as IProduct[]
-        // this.productCount = this.productService.size()
-    }
 
-    async mounted (): Promise<void> {
-        // this.logger.info('mounted')
-        // if (this.barcode) {
-        //     this.keyword = this.barcode
-        //     this.productService.setKeyword(this.barcode)
-        // }
-        // const items = await this.productService.getAllByKeyword({ keyword: this.keyword } as ISearchItem)
-        // this.products = items.data as IProduct[]
-        // this.productCount = this.productService.size()
-    }
-
-    getProductImageByBarcode (id: string) {
-        return `/images/product/${id}.jpg`
-    }
-}
+})
 
 </script>

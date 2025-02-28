@@ -10,22 +10,27 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component'
 import Logger from '@/util/logger'
+import {defineComponent} from "vue";
 
 /**
  * @author Ahto Jalak
  * @since 06.02.2023
  */
-@Options({
+export default defineComponent({
     components: {},
     props: {
         id: String
     },
     emits: [],
+    setup(props: any) {
+        const logger = new Logger("RoleEdit")
+        const id = props.id
+
+        return {
+            logger,
+            id,
+        }
+    },
 })
-export default class RoleEdit extends Vue {
-    private logger = new Logger(RoleEdit.name)
-    id!: string
-}
 </script>

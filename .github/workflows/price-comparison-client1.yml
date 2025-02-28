@@ -7,7 +7,7 @@
 # To get a newer version, you will need to update the SHA.
 # You can also reference a tag or branch, but the action may change without warning.
 
-name: Deploy client application to Amazon ECS
+name: Deploy client application to Amazon S3
 
 on:
   push:
@@ -16,18 +16,24 @@ on:
 
 env:
   WORK_DIR: price-comparison-client1
-  AWS_REGION: eu-west-1
   DIST_LOCATION_CODE: ./dist
 
 jobs:
-  deploy:
-    name: Deploy
+  build:
     runs-on: ubuntu-latest
-    environment: production
+    environment: test
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+
+      - name: Create .env file
+        uses: ozaytsev86/create-env-file@v1
+        with:
+          ENV_VITE_PUBLIC_API_URL: ${{ vars.VITE_PUBLIC_API_URL }}
+          ENV_VITE_IMAGES_URL: ${{ vars.VITE_IMAGES_URL }}
+          ENV_VITE_GOOGLE_MAP_API_KEY: ${{ secrets.VITE_GOOGLE_MAP_API_KEY }}
+          ENV_VITE_GOOGLE_RECAPTCHA_V3_SITE_KEY: ${{ secrets.VITE_GOOGLE_RECAPTCHA_V3_SITE_KEY }}
+          ENV_VITE_PAYPAL_CLIENT_ID: ${{ secrets.VITE_PAYPAL_CLIENT_ID }}
 
       - uses: dorny/paths-filter@v2
         id: changes
@@ -37,7 +43,7 @@ jobs:
               - "${{ env.WORK_DIR }}/**"
 
       - name: Early exit
-        if: steps.changes.outputs.src != 'true'
+        if: steps.changes.outputs.src != 'true' || github.ref != 'refs/heads/main'
         run: |
           gh run cancel ${{ github.run_id }}
           gh run watch ${{ github.run_id }}
@@ -51,14 +57,14 @@ jobs:
       - name: Run build
         working-directory: ${{ env.WORK_DIR }}
         run: npm run build
-
+    
       - name: Deploying application to Amazon S3
         uses: dvelasquez/deploy-s3-action@main
         with:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
-          AWS_BUCKET_NAME: ${{ secrets.AWS_BUCKET_NAME }}
+          AWS_ACCESS_KEY_ID: "${{ vars.AWS_ACCESS_KEY_ID }}"
+          AWS_SECRET_ACCESS_KEY: "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+          AWS_DEFAULT_REGION: "${{ vars.AWS_REGION }}"
+          AWS_BUCKET_NAME: "${{ vars.AWS_BUCKET_NAME }}"
           # BUCKET_PATH: "/pr/${{github.event.number}}"
           BUCKET_PATH: ""
           DIST_LOCATION_CODE: ./dist

@@ -41,20 +41,20 @@
 <script lang="ts">
 import { AlarmService } from '@/bll/service/AlarmService'
 import { useAlarmStore } from '@/stores/alarm'
-import { Options, Vue } from 'vue-class-component'
 import Logger from '@/util/logger'
 import Header from '@/components/Header.vue'
 import { IdentityService } from '@/bll/service/IdentityService'
 import router from '@/router'
-import { IAlarm } from '@/dal/domain/IAlarm'
+import type { IAlarm } from '@/dal/domain/IAlarm'
 import { ProductService } from '@/bll/service/ProductService'
 import { useProductStore } from '@/stores/product'
+import {defineComponent, onMounted} from "vue";
 
 /**
  * @author Ahto Jalak
  * @since 06.02.2023
  */
-@Options({
+export default defineComponent({
     components: {
         Header,
     },
@@ -62,57 +62,71 @@ import { useProductStore } from '@/stores/product'
         id: Number,
     },
     emits: [],
-})
-export default class AlarmCreate extends Vue {
-    private logger = new Logger(AlarmCreate.name)
-    id!: number
-    alarmStore = useAlarmStore()
-    productStore = useProductStore()
-    alarmService = new AlarmService()
-    productService = new ProductService()
-    private identityService = new IdentityService()
+    setup(props:any) {
+        const logger = new Logger("AlarmCreate")
 
-    minValue: number | undefined = undefined
-    minStep: number | undefined = undefined
-    errorMsg: string | null = null
+        const alarmStore = useAlarmStore()
+        const productStore = useProductStore()
+        const alarmService = new AlarmService()
+        const productService = new ProductService()
+        const identityService = new IdentityService()
+        const id = props.id
 
-    mounted () {
-        this.productService.getById(this.id).then((item) => {
-            if (item.errorMsg !== undefined) {
-                this.productStore.$state.product = {}
-            } else {
-                if (item.data) {
-                    this.productStore.$state.product = item.data
+        const minValue: number | undefined = undefined
+        const minStep: number | undefined = undefined
+        let errorMsg: string | null = null
+
+        onMounted( () => {
+            productService.getById(id).then((item) => {
+                if (item.errorMsg !== undefined) {
+                    productStore.$state.product = {}
+                } else {
+                    if (item.data) {
+                        productStore.$state.product = item.data
+                    }
                 }
-            }
+            })
         })
-    }
 
-    async submitClicked (): Promise<void> {
-        this.logger.info('submitClicked')
-
-        const alarmInfo: IAlarm = {
-            productId: this.id,
-            minValue: this.minValue,
+        return {
+            logger,
+            alarmStore,
+            productStore,
+            alarmService,
+            productService,
+            identityService,
+            minValue,
+            minStep,
+            errorMsg,
         }
-        this.alarmService.add(alarmInfo).then((item) => {
-            if (item.errorMsg !== undefined) {
-                this.errorMsg = item.errorMsg
-            } else {
-                if (item.data) {
-                    this.alarmStore.add(item.data)
-                }
-                router.push('/watchlist')
+    },
+    methods: {
+        async submitClicked (): Promise<void> {
+            this.logger.info('submitClicked')
+
+            const alarmInfo: IAlarm = {
+                productId: this.id,
+                minValue: this.minValue,
             }
-        })
-    }
+            this.alarmService.add(alarmInfo).then((item) => {
+                if (item.errorMsg !== undefined) {
+                    this.errorMsg = item.errorMsg
+                } else {
+                    if (item.data) {
+                        this.alarmStore.add(item.data)
+                    }
+                    router.push('/watchlist')
+                }
+            })
+        },
 
-    get isAuthenticated (): boolean {
-        return this.identityService.isAuthenticated()
-    }
+        isAuthenticated (): boolean {
+            return this.identityService.isAuthenticated()
+        },
 
-    getProduct () {
-        return this.productStore.$state.product
+        getProduct () {
+            return this.productStore.$state.product
+        }
     }
-}
+})
 </script>

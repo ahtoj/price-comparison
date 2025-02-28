@@ -10,22 +10,27 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component'
 import Logger from '@/util/logger'
+import {defineComponent} from "vue";
 
 /**
  * @author Ahto Jalak
  * @since 06.02.2023
  */
-@Options({
+export default defineComponent({
     components: {},
     props: {
         id: String
     },
     emits: [],
+    setup(props: any) {
+        const id = props.id
+        const logger = new Logger("WatchlistEdit")
+
+        return {
+            id,
+            logger,
+        }
+    }
 })
-export default class WatchlistEdit extends Vue {
-    private logger = new Logger(WatchlistEdit.name)
-    id!: string
-}
 </script>

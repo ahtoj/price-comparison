@@ -23,10 +23,10 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component'
 import { UserService } from '@/bll/service/UserService'
 import { useUserStore } from '@/stores/user'
 import Logger from '@/util/logger'
+import {defineComponent} from "vue";
 
 /**
  * @author Ahto Jalak
@@ -39,7 +39,16 @@ import Logger from '@/util/logger'
     },
     emits: [],
 })
-export default class UserDelete extends Vue {
+export default defineComponent({
+    setup() {
+        onMounted(() => {
+
+        })
+
+        return {
+
+        }
+    },
     private logger = new Logger(UserDelete.name)
     id!: string
     userStore = useUserStore()

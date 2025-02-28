@@ -1,9 +1,9 @@
 import { BaseRepository } from '@/dal/repository/BaseRepository'
-import { IOfferRepository } from '@/dal/repository/model/IOfferRepository'
+import type { IOfferRepository } from '@/dal/repository/model/IOfferRepository'
 import httpCLient from '@/util/http-client'
 import { AxiosError } from 'axios'
-import { IOffer } from '@/dal/domain/IOffer'
-import { IServiceResult } from '@/bll/service/model/IServiceResult'
+import type { IOffer } from '@/dal/domain/IOffer'
+import type { IServiceResult } from '@/bll/service/model/IServiceResult'
 
 /**
  * @author Ahto Jalak
@@ -24,10 +24,10 @@ export class OfferRepository extends BaseRepository<IOffer> implements IOfferRep
                     Authorization: 'Bearer ' + this.identityStore.$state.jwt?.token,
                 }
             })
-        } catch (e) {
+        } catch (e:any) {
             return {
                 status: (e as AxiosError).response?.status,
-                errorMsg: (e as AxiosError).response?.data.message,
+                errorMsg: e.response?.data.message,
             }
         }
 

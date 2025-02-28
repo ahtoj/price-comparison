@@ -37,85 +37,97 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component'
 import { WatchlistService } from '@/bll/service/WatchlistService'
 import { useWatchlistStore } from '@/stores/watchlist'
 import Logger from '@/util/logger'
-import { IWatchlist } from '@/dal/domain/IWatchlist'
+import type { IWatchlist } from '@/dal/domain/IWatchlist'
 import Header from '@/components/Header.vue'
 import { IdentityService } from '@/bll/service/IdentityService'
 import router from '@/router'
-import { IAlarm } from '@/dal/domain/IAlarm'
+import type { IAlarm } from '@/dal/domain/IAlarm'
 import { useAlarmStore } from '@/stores/alarm'
 import { AlarmService } from '@/bll/service/AlarmService'
+import {defineComponent, onMounted} from "vue";
 
 /**
  * @author Ahto Jalak
  * @since 06.02.2023
  */
-@Options({
+export default defineComponent({
     components: {
         Header
     },
     props: {},
     emits: [],
-})
-export default class WatchlistIndex extends Vue {
-    private logger = new Logger(WatchlistIndex.name)
-    private identityService = new IdentityService()
-    watchlistStore = useWatchlistStore()
-    watchlistService = new WatchlistService()
-    alarmStore = useAlarmStore()
-    alarmService = new AlarmService()
+    setup() {
 
-    errorMsg: string | null = null
+        const logger = new Logger("WatchlistIndex")
+        const identityService = new IdentityService()
+        const watchlistStore = useWatchlistStore()
+        const watchlistService = new WatchlistService()
+        const alarmStore = useAlarmStore()
+        const alarmService = new AlarmService()
 
-    async mounted (): Promise<void> {
-        this.logger.info('mounted')
-        const items = await this.watchlistService.getAll()
-        this.watchlistStore.$state.watchlists = items.data as IWatchlist[]
-    }
+        let errorMsg: string | null = null
 
-    get isAuthenticated (): boolean {
-        return this.identityService.isAuthenticated()
-    }
+        onMounted(async () => {
+            logger.info('mounted')
+            const items = await watchlistService.getAll()
+            watchlistStore.$state.watchlists = items.data as IWatchlist[]
+        })
 
-    getWatchlist (): IWatchlist[] {
-        return this.watchlistStore.$state.watchlists
-    }
+        return {
+            logger,
+            identityService,
+            watchlistStore,
+            watchlistService,
+            alarmStore,
+            alarmService,
+            errorMsg,
+        }
+    },
+    methods: {
+        isAuthenticated (): boolean {
+            return this.identityService.isAuthenticated()
+        },
 
-    addAlarm (productId: number) {
-        this.logger.info('addAlarm')
-        router.push('/alarm/create/' + productId)
-    }
+        getWatchlist (): IWatchlist[] {
+            return this.watchlistStore.$state.watchlists
+        },
 
-    clickRemove (watchlistId: number) {
-        this.watchlistService.delete(watchlistId).then((item) => {
-            if (item.errorMsg !== undefined) {
-                this.errorMsg = item.errorMsg
-            } else {
-                if (item.data) {
-                    this.watchlistStore.remove(item.data)
+        addAlarm (productId: number) {
+            this.logger.info('addAlarm')
+            router.push('/alarm/create/' + productId)
+        },
+
+        clickRemove (watchlistId: number) {
+            this.watchlistService.delete(watchlistId).then((item : any) => {
+                if (item.errorMsg !== undefined) {
+                    this.errorMsg = item.errorMsg
+                } else {
+                    if (item.data) {
+                        this.watchlistStore.remove(item.data)
+                    }
+                }
+            })
+        },
+
+        alarmIsActive (id: number) {
+            this.logger.info('alarmIsActive')
+            for (let i = 0; i < this.alarmStore.alarmCount; i++) {
+                const x = this.alarmStore.$state.alarms[i] as IAlarm
+                if (id === x.productId) {
+                    return true
                 }
             }
-        })
-    }
 
-    alarmIsActive (id: number) {
-        this.logger.info('alarmIsActive')
-        for (let i = 0; i < this.alarmStore.alarmCount; i++) {
-            const x = this.alarmStore.$state.alarms[i] as IAlarm
-            if (id === x.productId) {
-                return true
-            }
+            return false
+        },
+
+        getProductImageByBarcode (id: string) {
+            return `/images/product/${id}.jpg`
         }
-
-        return false
     }
-
-    getProductImageByBarcode (id: string) {
-        return `/images/product/${id}.jpg`
-    }
-}
+})
 
 </script>

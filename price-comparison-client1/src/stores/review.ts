@@ -1,12 +1,11 @@
 import { defineStore } from 'pinia'
-import { IReview } from '@/dal/domain/IReview'
+import type { IReview } from '@/dal/domain/IReview'
 
 /**
  * @author Ahto Jalak
  * @since 06.02.2023
  */
-export const useReviewStore = defineStore({
-    id: 'reviews',
+export const useReviewStore = defineStore('reviews', {
     state: () => ({
         review: {} as IReview,
         reviews: [] as IReview[],

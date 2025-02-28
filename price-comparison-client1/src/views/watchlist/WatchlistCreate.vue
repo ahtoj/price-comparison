@@ -25,43 +25,51 @@
 <script lang="ts">
 import { WatchlistService } from '@/bll/service/WatchlistService'
 import { useWatchlistStore } from '@/stores/watchlist'
-import { Options, Vue } from 'vue-class-component'
 import { CustomerService } from '@/bll/service/CustomerService'
-import { IWatchlist } from '@/dal/domain/IWatchlist'
+import type { IWatchlist } from '@/dal/domain/IWatchlist'
 import Logger from '@/util/logger'
+import router from "@/router";
+import {defineComponent} from "vue";
 
 /**
  * @author Ahto Jalak
  * @since 06.02.2023
  */
-@Options({
-    components: {},
-    props: {},
-    emits: [],
-})
-export default class WatchlistCreate extends Vue {
-    private logger = new Logger(WatchlistCreate.name)
+export default defineComponent({
+    setup() {
+        const logger = new Logger("WatchlistCreate")
 
-    watchlistStore = useWatchlistStore()
-    watchlistService = new WatchlistService()
-    customerService = new CustomerService()
+        const watchlistStore = useWatchlistStore()
+        const watchlistService = new WatchlistService()
+        const customerService = new CustomerService()
 
-    errorMsg: string | null = null
+        let errorMsg: string | null = null
 
-    async submitClicked (): Promise<void> {
-        this.logger.info('submitClicked')
-
-        const watchlist: IWatchlist = {}
-        const res = await this.watchlistService.add(watchlist)
-
-        if (res.status == null || res.status >= 300) {
-            this.errorMsg = res.status + ' ' + res.errorMsg
-        } else {
-            // this.watchlistStore.$state.watchlistes =
-            //     await this.watchlistService.getAll()
-
-            this.$router.push('/watchlist')
+        return {
+            logger,
+            watchlistStore,
+            watchlistService,
+            customerService,
+            errorMsg,
         }
-    }
-}
+
+    },
+    methods: {
+        async submitClicked (): Promise<void> {
+            this.logger.info('submitClicked')
+
+            const watchlist: IWatchlist = {}
+            const res = await this.watchlistService.add(watchlist)
+
+            if (res.status == null || res.status >= 300) {
+                this.errorMsg = res.status + ' ' + res.errorMsg
+            } else {
+                // this.watchlistStore.$state.watchlistes =
+                //     await this.watchlistService.getAll()
+
+                await router.push('/watchlist')
+            }
+        }
+    },
+})
 </script>

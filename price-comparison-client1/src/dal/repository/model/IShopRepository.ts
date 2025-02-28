@@ -1,5 +1,5 @@
-import { IServiceResult } from '@/bll/service/model/IServiceResult'
-import { IShop } from '@/dal/domain/IShop'
+import type { IServiceResult } from '@/bll/service/model/IServiceResult'
+import type { IShop } from '@/dal/domain/IShop'
 
 /**
  * @author Ahto Jalak

@@ -5,8 +5,7 @@ import { defineStore } from 'pinia'
  * @author Ahto Jalak
  * @since 06.02.2023
  */
-export const usePriceStore = defineStore({
-    id: 'prices',
+export const usePriceStore = defineStore('prices', {
     state: () => ({
         price: {} as IPrice,
         prices: [] as IPrice[],

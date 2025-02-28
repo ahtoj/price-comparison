@@ -18,11 +18,11 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component'
 import { UserService } from '@/bll/service/UserService'
 import { useUserStore } from '@/stores/user'
 import Logger from '@/util/logger'
-import { IUser } from '@/dal/domain/IUser'
+import type { IUser } from '@/dal/domain/IUser'
+import {defineComponent} from "vue";
 
 /**
  * @author Ahto Jalak
@@ -35,7 +35,16 @@ import { IUser } from '@/dal/domain/IUser'
     },
     emits: [],
 })
-export default class UserDetails extends Vue {
+export default defineComponent({
+    setup() {
+        onMounted(() => {
+
+        })
+
+        return {
+
+        }
+    },
     private logger = new Logger(UserDetails.name)
     id!: number
     userStore = useUserStore()

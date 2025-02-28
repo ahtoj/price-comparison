@@ -1,7 +1,7 @@
 import httpCLient from '@/util/http-client'
-import { useIdentityStore } from '@/stores/identity'
-import type { AxiosError } from 'axios'
-import type { IServiceResult } from './model/IServiceResult'
+import {useIdentityStore} from '@/stores/identity'
+import {AxiosError} from 'axios'
+import type {IServiceResult} from './model/IServiceResult'
 import Logger from '@/util/logger'
 
 /**
@@ -28,12 +28,11 @@ export class BaseService<TEntity> {
                     Authorization: 'Bearer ' + this.identityStore.$state.jwt?.token
                 }
             })
-        } catch (e) {
-            const res = {
-                status: (e as AxiosError).response?.status,
-                errorMsg: (e as AxiosError).response?.data.error,
+        } catch (e : any) {
+            return {
+                status: e.response?.status,
+                errorMsg: e.response?.data.error,
             }
-            return res
         }
 
         // const res = response.data.details as TEntity[]
@@ -54,10 +53,10 @@ export class BaseService<TEntity> {
                         Authorization: 'Bearer ' + this.identityStore.$state.jwt?.token
                     }
                 })
-        } catch (e) {
+        } catch (e : any) {
             const res = {
                 status: (e as AxiosError).response?.status,
-                errorMsg: (e as AxiosError).response?.data.error,
+                errorMsg: e.response?.data.error,
             }
             return res
         }
@@ -79,10 +78,10 @@ export class BaseService<TEntity> {
                     Authorization: 'Bearer ' + this.identityStore.$state.jwt?.token
                 }
             })
-        } catch (e) {
+        } catch (e : any) {
             const res = {
                 status: (e as AxiosError).response?.status,
-                errorMsg: (e as AxiosError).response?.data.error,
+                errorMsg: e.response?.data.error,
             }
 
             // try token refresh
@@ -133,10 +132,10 @@ export class BaseService<TEntity> {
                         Authorization: 'Bearer ' + this.identityStore.$state.jwt?.token
                     }
                 })
-        } catch (e) {
+        } catch (e : any) {
             const res = {
                 status: (e as AxiosError).response?.status,
-                errorMsg: (e as AxiosError).response?.data.error,
+                errorMsg: e.response?.data.error,
             }
             return res
         }
@@ -157,10 +156,10 @@ export class BaseService<TEntity> {
                         Authorization: 'Bearer ' + this.identityStore.$state.jwt?.token
                     }
                 })
-        } catch (e) {
+        } catch (e : any) {
             const res = {
                 status: (e as AxiosError).response?.status,
-                errorMsg: (e as AxiosError).response?.data.error,
+                errorMsg: e.response?.data.error,
             }
             return res
         }

@@ -11,20 +11,31 @@
     </div>
 </template>
 
-<script>
-import { Vue } from 'vue-class-component'
+<script lang="ts">
 import { useIdentityStore } from '@/stores/identity'
 import Logger from '@/util/logger'
+import {defineComponent} from "vue";
 
-export default class EditRoles extends Vue {
-    private logger = new Logger(EditRoles.name)
-    private identityStore = useIdentityStore()
-    private wasOk: boolean | null = null
+export default defineComponent({
+    setup() {
+        const logger = new Logger("EditRoles")
+        const identityStore = useIdentityStore()
+        const wasOk: boolean | null = null
 
-    email = ''
-    password = ''
-    errorMsg: string | null = null
-}
+        const email = ''
+        const password = ''
+        let errorMsg: string | null = null
+
+        return {
+            logger,
+            identityStore,
+            email,
+            password,
+            wasOk,
+            errorMsg,
+        }
+    },
+})
 </script>
 
 <style scoped>

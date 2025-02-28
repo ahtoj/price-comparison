@@ -30,28 +30,32 @@
 <script lang="ts">
 import { AccountService } from '@/bll/service/AccountService'
 import { useAccountStore } from '@/stores/account'
-import { Options, Vue } from 'vue-class-component'
 import Logger from '@/util/logger'
+import {defineComponent, onMounted} from "vue";
 
 /**
  * @author Ahto Jalak
  * @since 06.02.2023
  */
-@Options({
+export default defineComponent({
     components: {},
     props: {},
     emits: [],
-})
-export default class AccountIndex extends Vue {
-    private logger = new Logger(AccountIndex.name)
-    accountsStore = useAccountStore()
-    accountService = new AccountService()
+    setup() {
+        const logger = new Logger("AccountIndex")
+        const accountsStore = useAccountStore()
+        const accountService = new AccountService()
 
-    async mounted (): Promise<void> {
-        this.logger.info('mounted')
-        // this.accountsStore.$state.accounts =
-        //     await this.accountService.getAll()
+        onMounted(() => {
+            logger.info('mounted')
+        })
+
+        return {
+            logger,
+            accountsStore,
+            accountService,
+        }
     }
-}
+})
 
 </script>

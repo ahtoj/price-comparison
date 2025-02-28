@@ -1,49 +1,91 @@
 <script lang="ts">
 import { useIdentityStore } from '@/stores/identity'
-import { Options, Vue } from 'vue-class-component'
 import router from '@/router'
-import { IResponseMessage } from '@/dal/domain/IResponseMessage'
-import { IRegisterInfo } from '@/dal/domain/IRegisterInfo'
+import type { IResponseMessage } from '@/dal/domain/IResponseMessage'
+import type { IRegisterInfo } from '@/dal/domain/IRegisterInfo'
 import Logger from '@/util/logger'
-import { CredentialResponse } from "vue3-google-signin"
+import type { CredentialResponse } from "vue3-google-signin"
+import {defineComponent} from "vue";
 
 /**
  * @author Ahto Jalak
  * @since 06.02.2023
  */
-@Options({
+export default defineComponent({
     components: {},
-    methods: {
-    },
     props: {},
     emits: [],
-})
-export default class Register extends Vue {
-    private logger = new Logger(Register.name)
-    private identityStore = useIdentityStore()
-    private loginWasOk: boolean | null = null
-    errorMsg: string | null = null
-    invitation = ''
-    email = ''
-    firstname = ''
-    lastname = ''
-    password = ''
-    passwordRepeat = ''
-    consent = false
+    setup() {
+        const logger = new Logger("Register")
+        const identityStore = useIdentityStore()
+        const loginWasOk: boolean | null = null
+        const errorMsg: string | null = null
+        const invitation = ''
+        const email = ''
+        const firstname = ''
+        const lastname = ''
+        const password = ''
+        const passwordRepeat = ''
+        const consent = false
 
-    handleLoginSuccess (response: CredentialResponse): void {
-        console.log("Access Token", response)
+        return {
+            logger,
+            identityStore,
+            loginWasOk,
+            errorMsg,
+            invitation,
+            email,
+            firstname,
+            lastname,
+            password,
+            passwordRepeat,
+            consent,
+        }
+    },
+    methods: {
+        handleLoginSuccess (response: CredentialResponse): void {
+            console.log("Access Token", response)
 
-        if (response.credential) {
+            if (response.credential) {
+                const registerInfo: IRegisterInfo = {
+                    invitation: "",
+                    email: "",
+                    password: "",
+                    firstname: "",
+                    lastname: "",
+                    consent: true,
+                    provider: "G",
+                    credential: response.credential,
+                }
+                this.identityStore.registerUser(registerInfo)
+                    .then((response: IResponseMessage) => {
+                        this.loginWasOk = response.data !== undefined
+                        if (this.loginWasOk) {
+                            router.push('/')
+                        } else {
+                            if (response.errorMsg != null) {
+                                this.errorMsg = response.errorMsg
+                            }
+                        }
+                    })
+            }
+        },
+
+        handleLoginError (): void {
+            console.log("Login failed")
+        },
+
+        async registerClicked (): Promise<void> {
+            this.logger.info('submitClicked')
             const registerInfo: IRegisterInfo = {
-                invitation: "",
-                email: "",
-                password: "",
-                firstname: "",
-                lastname: "",
-                consent: true,
-                provider: "G",
-                credential: response.credential,
+                invitation: this.invitation,
+                email: this.email,
+                firstname: this.firstname,
+                lastname: this.lastname,
+                password: this.password,
+                consent: this.consent,
+                provider: "B",
+                credential: ""
             }
             this.identityStore.registerUser(registerInfo)
                 .then((response: IResponseMessage) => {
@@ -56,38 +98,9 @@ export default class Register extends Vue {
                         }
                     }
                 })
-        }
+        },
     }
-
-    handleLoginError (): void {
-        console.log("Login failed")
-    }
-
-    async registerClicked (): Promise<void> {
-        this.logger.info('submitClicked')
-        const registerInfo: IRegisterInfo = {
-            invitation: this.invitation,
-            email: this.email,
-            firstname: this.firstname,
-            lastname: this.lastname,
-            password: this.password,
-            consent: this.consent,
-            provider: "B",
-            credential: ""
-        }
-        this.identityStore.registerUser(registerInfo)
-            .then((response: IResponseMessage) => {
-                this.loginWasOk = response.data !== undefined
-                if (this.loginWasOk) {
-                    router.push('/')
-                } else {
-                    if (response.errorMsg != null) {
-                        this.errorMsg = response.errorMsg
-                    }
-                }
-            })
-    }
-}
+})
 </script>
 
 <template>

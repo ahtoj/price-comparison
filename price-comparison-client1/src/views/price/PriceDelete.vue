@@ -23,45 +23,54 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component'
 import { PriceService } from '@/bll/service/PriceService'
 import { usePriceStore } from '@/stores/price'
 import Logger from '@/util/logger'
+import {defineComponent} from "vue";
 
 /**
  * @author Ahto Jalak
  * @since 06.02.2023
  */
-@Options({
+export default defineComponent({
     components: {},
     props: {
         id: String
     },
     emits: [],
-})
-export default class PriceDelete extends Vue {
-    private logger = new Logger(PriceDelete.name)
-    id!: string
-    wishesStore = usePriceStore()
-    wishService = new PriceService()
+    setup() {
+        const logger = new Logger("PriceDelete")
+        const id = props.id
+        const wishesStore = usePriceStore()
+        const wishService = new PriceService()
 
-    errorMsg: string | null = null
+        const errorMsg: string | null = null
 
-    async submitClicked (): Promise<void> {
-        this.logger.info('submitClicked')
-
-        // const res = await this.wishService.delete(this.id);
-
-        /*
-        if (res.status >= 300) {
-            this.errorMsg = res.status + ' ' + res.errorMsg
-        } else {
-            this.wishesStore.$state.wishes =
-                await this.wishService.getAll()
-
-            this.$router.push('/wishes')
+        return {
+            logger,
+            id,
+            wishesStore,
+            wishService,
+            errorMsg,
         }
-         */
+    },
+    methods: {
+        async submitClicked (): Promise<void> {
+            this.logger.info('submitClicked')
+
+            // const res = await this.wishService.delete(this.id);
+
+            /*
+            if (res.status >= 300) {
+                this.errorMsg = res.status + ' ' + res.errorMsg
+            } else {
+                this.wishesStore.$state.wishes =
+                    await this.wishService.getAll()
+
+                this.$router.push('/wishes')
+            }
+             */
+        }
     }
-}
+})
 </script>

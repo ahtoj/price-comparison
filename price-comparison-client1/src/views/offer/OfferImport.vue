@@ -28,107 +28,121 @@
 
 <script lang="ts">
 import { ProductService } from '@/bll/service/ProductService'
-import { Options, Vue } from 'vue-class-component'
 import Logger from '@/util/logger'
 import router from '@/router'
-import { IShop } from '@/dal/domain/IShop'
+import type { IShop } from '@/dal/domain/IShop'
 import { useShopStore } from '@/stores/shop'
 import { ShopService } from '@/bll/service/ShopService'
 import DistanceUtil from '@/util/distance-util'
 import { useIdentityStore } from '@/stores/identity'
 import { IdentityService } from '@/bll/service/IdentityService'
-import { IProductImport } from '@/dal/domain/IProductImport'
+import type { IProductImport } from '@/dal/domain/IProductImport'
+import {defineComponent, onMounted} from "vue";
 
 /**
  * @author Ahto Jalak
  * @since 15.04.2023
  */
-@Options({
+export default defineComponent({
     components: {},
     props: {
         barcode: String,
     },
     emits: [],
-})
-export default class OfferImport extends Vue {
-    private logger = new Logger(OfferImport.name)
-    private productService = new ProductService()
-    private shopService = new ShopService()
-    private shopStore = useShopStore()
-    private identityStore = useIdentityStore()
-    private identityService = new IdentityService()
+    setup() {
+        const logger = new Logger("OfferImport")
+        const productService = new ProductService()
+        const shopService = new ShopService()
+        const shopStore = useShopStore()
+        const identityStore = useIdentityStore()
+        const identityService = new IdentityService()
 
-    listDataString = 'barcode;name;description;url;price'
-    storeId = 0
-    errorMsg: string | null = null
+        const listDataString = 'barcode;name;description;url;price'
+        const storeId = 0
+        let errorMsg: string | null = null
 
-    async submitClicked (): Promise<void> {
-        this.logger.info('submitClicked')
+        onMounted(() => {
+            logger.info('mounted')
+            const distanceUtil = new DistanceUtil()
 
-        const obj: IProductImport = {
-            storeId: this.storeId,
-            productImportItems: this.convertToJson(this.listDataString),
-        }
-        this.logger.info(obj as string)
+            shopService.getAll().then((items) => {
+                if (items.errorMsg !== undefined) {
+                    errorMsg = items.errorMsg
+                } else {
+                    const uniqueNodes = items.data
+                    if (uniqueNodes) {
+                        for (let i = 0; i < uniqueNodes.length; i++) {
+                            uniqueNodes[i].distance = distanceUtil.calculateDistance(
+                                identityStore.getCoords().latitude ?? 59.436962,
+                                identityStore.getCoords().longitude ?? 24.753574,
+                                uniqueNodes[i].latitude ?? 59.436962,
+                                uniqueNodes[i].longitude ?? 24.753574,
+                                "K"
+                            );
+                        }
 
-        await this.productService.import(obj).then((items) => {
-            if (items.errorMsg !== undefined) {
-                this.errorMsg = items.errorMsg
-            } else {
-                if (items.data) {
-                    router.push('/')
-                }
-            }
-        })
-    }
+                        uniqueNodes.sort(function(a, b) {
+                            return (a.distance ?? 0) - (b.distance ?? 0);
+                        });
 
-    mounted (): void {
-        this.logger.info('mounted')
-        const distanceUtil = new DistanceUtil()
-
-        this.shopService.getAll().then((items) => {
-            if (items.errorMsg !== undefined) {
-                this.errorMsg = items.errorMsg
-            } else {
-                const uniqueNodes = items.data
-                if (uniqueNodes) {
-                    for (let i = 0; i < uniqueNodes.length; i++) {
-                        uniqueNodes[i].distance = distanceUtil.calculateDistance(
-                            this.identityStore.getCoords().latitude ?? 59.436962,
-                            this.identityStore.getCoords().longitude ?? 24.753574,
-                            uniqueNodes[i].latitude ?? 59.436962,
-                            uniqueNodes[i].longitude ?? 24.753574,
-                            "K"
-                        );
+                        shopStore.$state.shops = uniqueNodes
                     }
-
-                    uniqueNodes.sort(function(a, b) {
-                        return (a.distance ?? 0) - (b.distance ?? 0);
-                    });
-
-                    this.shopStore.$state.shops = uniqueNodes
                 }
+            })
+
+        })
+
+        return {
+            logger,
+            productService,
+            shopService,
+            shopStore,
+            identityStore,
+            identityService,
+            listDataString,
+            storeId,
+            errorMsg,
+        }
+    },
+    methods: {
+        async submitClicked (): Promise<void> {
+            this.logger.info('submitClicked')
+
+            const obj: IProductImport = {
+                storeId: this.storeId,
+                productImportItems: this.convertToJson(this.listDataString),
             }
-        })
-    }
+            this.logger.info(obj as string)
 
-    getShopList (): IShop[] {
-        return this.shopStore.$state.shops
-    }
+            await this.productService.import(obj).then((items) => {
+                if (items.errorMsg !== undefined) {
+                    this.errorMsg = items.errorMsg
+                } else {
+                    if (items.data) {
+                        router.push('/')
+                    }
+                }
+            })
+        },
 
-    convertToJson (input: string) {
-        const lines = input.split(/\n/)
-        const header = lines[0].split(/\\t|\n|;|\t/)
-        const output = lines.slice(1).map(line => {
-            const fields = line.split(/\\t|\n|;|\t/)
-            return Object.fromEntries(header.map((h, i) => [h, fields[i]]))
-        })
+        getShopList (): IShop[] {
+            return this.shopStore.$state.shops
+        },
 
-        return output
-    }
+        convertToJson (input: string) {
+            const lines = input.split(/\n/)
+            const header = lines[0].split(/\\t|\n|;|\t/)
+            const output = lines.slice(1).map(line => {
+                const fields = line.split(/\\t|\n|;|\t/)
+                return Object.fromEntries(header.map((h, i) => [h, fields[i]]))
+            })
 
-    get isAuthenticated (): boolean {
-        return this.identityService.isAuthenticated()
-    }
-}
+            return output
+        },
+
+        isAuthenticated (): boolean {
+            return this.identityService.isAuthenticated()
+        }
+    },
+})
 </script>

@@ -23,46 +23,56 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component'
 import { RoleService } from '@/bll/service/RoleService'
 import { useRoleStore } from '@/stores/role'
 import Logger from '@/util/logger'
+import {defineComponent} from "vue";
 
 /**
  * @author Ahto Jalak
  * @since 06.02.2023
  */
-@Options({
+export default defineComponent({
     components: {},
     props: {
         id: String
     },
     emits: [],
-})
-export default class RoleDelete extends Vue {
-    private logger = new Logger(RoleDelete.name)
+    setup(props) {
+        const logger = new Logger("RoleDelete")
 
-    id!: string
-    wishesStore = useRoleStore()
-    wishService = new RoleService()
+        const id = props.id
+        const wishesStore = useRoleStore()
+        const wishService = new RoleService()
 
-    errorMsg: string | null = null
+        const errorMsg: string | null = null
 
-    async submitClicked (): Promise<void> {
-        this.logger.info('submitClicked')
-
-        // const res = await this.wishService.delete(this.id);
-
-        /*
-        if (res.status >= 300) {
-            this.errorMsg = res.status + ' ' + res.errorMsg
-        } else {
-            this.wishesStore.$state.wishes =
-                await this.wishService.getAll()
-
-            this.$router.push('/wishes')
+        return {
+            logger,
+            id,
+            wishesStore,
+            wishService,
+            errorMsg,
         }
-         */
+    },
+    methods: {
+        async submitClicked (): Promise<void> {
+            this.logger.info('submitClicked')
+
+            // const res = await this.wishService.delete(this.id);
+
+            /*
+            if (res.status >= 300) {
+                this.errorMsg = res.status + ' ' + res.errorMsg
+            } else {
+                this.wishesStore.$state.wishes =
+                    await this.wishService.getAll()
+
+                this.$router.push('/wishes')
+            }
+             */
+        }
     }
-}
+
+})
 </script>

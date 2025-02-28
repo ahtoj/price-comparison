@@ -1,4 +1,4 @@
-import { IServiceResult } from '@/bll/service/model/IServiceResult'
+import type { IServiceResult } from '@/bll/service/model/IServiceResult'
 
 /**
  * @author Ahto Jalak

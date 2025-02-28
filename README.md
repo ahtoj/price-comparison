@@ -25,7 +25,7 @@ spring.datasource.hikari.schema=public
 
 ```
 flyway {
-    url = 'jdbc:postgresql://mmdb.shopleech.com:9097/jpa_demo'
+    url = 'jdbc:postgresql://localhost:5432/jpa_demo'
     user = ''
     password = ''
     schemas = ['public']

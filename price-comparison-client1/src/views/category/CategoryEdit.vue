@@ -31,53 +31,64 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component'
 import { useCategoryStore } from '@/stores/category'
 import { CategoryService } from '@/bll/service/CategoryService'
 import Logger from '@/util/logger'
+import {defineComponent, onMounted} from "vue";
 
 /**
  * @author Ahto Jalak
  * @since 06.02.2023
  */
-@Options({
+export default defineComponent({
     components: {},
     props: {
         id: String,
         name: String
     },
     emits: [],
+    setup(props: any) {
+        const logger = new Logger("CategoryCreate")
+        const id = props.id
+        const categoryName = props.name
+        let errorMsg: string | null = null
+        const categoriesStore = useCategoryStore()
+        const categoryService = new CategoryService()
+
+        onMounted(() => {
+            logger.info('mounted')
+            // const item = await this.categoryService.get(this.id)
+            // this.categoryName = x.name ?? ''
+            // this.categoriesStore.$state.category = x
+
+        })
+
+        return {
+            logger,
+            id,
+            categoryName,
+            categoriesStore,
+            categoryService,
+            errorMsg,
+        }
+    },
+    methods: {
+        async submitClicked (): Promise<void> {
+            this.logger.info('submitClicked')
+
+            // const x = await this.categoryService.get(this.id)
+            // x.name = this.categoryName
+
+            // const res = await this.categoryService.update(this.id, x)
+
+            // if (res.status == null || res.status >= 300) {
+            //     this.errorMsg = res.status + ' ' + res.errorMsg
+            // } else {
+            //     const item = await this.categoryService.get(this.id)
+            //     this.categoriesStore.$state.category = item.data as ICategory
+            //     this.$router.push(`/categories/details/${this.id}`)
+            // }
+        }
+    }
 })
-export default class CategoryCreate extends Vue {
-    private logger = new Logger(CategoryCreate.name)
-    id!: string
-    categoryName!: string
-    errorMsg: string | null = null
-    categoriesStore = useCategoryStore()
-    categoryService = new CategoryService()
-
-    async submitClicked (): Promise<void> {
-        this.logger.info('submitClicked')
-
-        // const x = await this.categoryService.get(this.id)
-        // x.name = this.categoryName
-
-        // const res = await this.categoryService.update(this.id, x)
-
-        // if (res.status == null || res.status >= 300) {
-        //     this.errorMsg = res.status + ' ' + res.errorMsg
-        // } else {
-        //     const item = await this.categoryService.get(this.id)
-        //     this.categoriesStore.$state.category = item.data as ICategory
-        //     this.$router.push(`/categories/details/${this.id}`)
-        // }
-    }
-
-    async mounted (): Promise<void> {
-        this.logger.info('mounted')
-        // const item = await this.categoryService.get(this.id)
-        // this.categoryName = x.name ?? ''
-        // this.categoriesStore.$state.category = x
-    }
-}
 </script>

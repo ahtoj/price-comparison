@@ -20,31 +20,36 @@
 <script lang="ts">
 import { CustomerService } from '@/bll/service/CustomerService'
 import { useCustomerStore } from '@/stores/customer'
-import { Options, Vue } from 'vue-class-component'
 import Logger from '@/util/logger'
+import {defineComponent, onMounted} from "vue";
 
 /**
  * @author Ahto Jalak
  * @since 06.02.2023
  */
-@Options({
+export default defineComponent({
     components: {},
     props: {
         id: String
     },
     emits: [],
-})
-export default class CustomerDetails extends Vue {
-    private logger = new Logger(CustomerDetails.name)
-    id!: string
-    customersStore = useCustomerStore()
-    customerService = new CustomerService()
+    setup() {
+        const logger = new Logger("CustomerDetails")
+        const customersStore = useCustomerStore()
+        const customerService = new CustomerService()
 
-    async mounted (): Promise<void> {
-        this.logger.info('mounted')
-        // this.customersStore.$state.customer =
-        //     await this.customerService.get(this.id)
+        onMounted(() => {
+            logger.info('mounted')
+            // this.customersStore.$state.customer =
+            //     await this.customerService.get(this.id)
+        })
+
+        return {
+            logger,
+            customersStore,
+            customerService
+        }
     }
-}
+})
 
 </script>

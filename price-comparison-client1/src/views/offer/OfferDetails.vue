@@ -19,32 +19,39 @@
 
 <script lang="ts">
 import { OfferService } from '@/bll/service/OfferService'
-import { Options, Vue } from 'vue-class-component'
 import { useOfferStore } from '@/stores/offer'
 import Logger from '@/util/logger'
+import {defineComponent} from "vue";
 
 /**
  * @author Ahto Jalak
  * @since 06.02.2023
  */
-@Options({
+export default defineComponent({
     components: {},
     props: {
         id: String
     },
     emits: [],
-})
-export default class OfferDetails extends Vue {
-    private logger = new Logger(OfferDetails.name)
-    id!: string
-    merchandisesStore = useOfferStore()
-    merchandiseService = new OfferService()
+    setup(props) {
+        const logger = new Logger("OfferDetails")
+        const id = props.id
+        const merchandisesStore = useOfferStore()
+        const merchandiseService = new OfferService()
 
-    async mounted (): Promise<void> {
-        this.logger.info('mounted')
-        // this.merchandisesStore.$state.offer =
-        //     await this.merchandiseService.get(this.id)
+        return {
+            logger,
+            id,
+            merchandisesStore,
+            merchandiseService,
+        }
+    },
+    methods: {
+        async mounted (): Promise<void> {
+            this.logger.info('mounted')
+            // this.merchandisesStore.$state.offer =
+            //     await this.merchandiseService.get(this.id)
+        }
     }
-}
-
+})
 </script>

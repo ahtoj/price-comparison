@@ -12,9 +12,9 @@
         </tr>
         </thead>
         <tbody>
-        <tr v-for="item of wishes" :key="item.id">
+        <tr v-for="item of metricStore.metrics" :key="item.id">
             <td>{{ item.id }}</td>
-            <td>{{ item.customerId }}</td>
+            <td>{{ item.categoryId }}</td>
             <td>
                 <RouterLink :to="{ name: 'wishes-details', params: { id: item.id } }">Details</RouterLink>
                 |
@@ -28,30 +28,35 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component'
 import { useMetricStore } from '@/stores/metric'
 import { MetricService } from '@/bll/service/MetricService'
 import Logger from '@/util/logger'
+import {defineComponent, onMounted} from "vue";
 
 /**
  * @author Ahto Jalak
  * @since 06.02.2023
  */
-@Options({
+export default defineComponent({
     components: {},
     props: {},
     emits: [],
+    setup() {
+        const logger = new Logger("MetricIndex")
+        const metricStore = useMetricStore()
+        const wishService = new MetricService()
+
+        onMounted(() => {
+            logger.info('mounted')
+            // this.wishesStore.$state.metrics =
+            //     await this.wishService.getAll()
+        })
+
+        return {
+            logger,
+            metricStore,
+            wishService,
+        }
+    },
 })
-export default class MetricIndex extends Vue {
-    private logger = new Logger(MetricIndex.name)
-    wishesStore = useMetricStore()
-    wishService = new MetricService()
-
-    async mounted (): Promise<void> {
-        this.logger.info('mounted')
-        // this.wishesStore.$state.metrics =
-        //     await this.wishService.getAll()
-    }
-}
-
 </script>

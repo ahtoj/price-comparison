@@ -16,18 +16,12 @@ on:
 
 env:
   WORK_DIR: public-api
-  AWS_REGION: eu-west-1
-  ECR_REPOSITORY: sl-public-api
-  ECS_SERVICE: sl-ecs-dev_public-api-service
-  ECS_CLUSTER: sl-ecs-dev
-  ECS_TASK_DEFINITION: sl-ecs-dev_public-api
-  CONTAINER_NAME: sl-ecs-dev_task_container2
 
 jobs:
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
-    environment: production
+    environment: test
 
     steps:
       - name: Checkout
@@ -41,7 +35,7 @@ jobs:
               - "${{ env.WORK_DIR }}/**"
 
       - name: Early exit
-        if: steps.changes.outputs.src != 'true'
+        if: steps.changes.outputs.src != 'true' || github.ref != 'refs/heads/main'
         run: |
           gh run cancel ${{ github.run_id }}
           gh run watch ${{ github.run_id }}
@@ -63,14 +57,14 @@ jobs:
         with:
           path: "${{ env.WORK_DIR }}/src/main/resources/application.properties"
           property: 'spring.datasource.url'
-          value: ${{ secrets.DB_URL }}
+          value: ${{ vars.DB_URL }}
 
       - name: Write value to Properties-file
         uses: christian-draeger/write-properties@1.0.1
         with:
           path: "${{ env.WORK_DIR }}/src/main/resources/application.properties"
           property: 'spring.datasource.username'
-          value: ${{ secrets.DB_USERNAME }}
+          value: ${{ vars.DB_USERNAME }}
 
       - name: Write value to Properties-file
         uses: christian-draeger/write-properties@1.0.1
@@ -84,14 +78,14 @@ jobs:
         with:
           path: "${{ env.WORK_DIR }}/src/main/resources/application.properties"
           property: 'spring.datasource.hikari.schema'
-          value: ${{ secrets.DB_SCHEMA }}
+          value: ${{ vars.DB_SCHEMA }}
 
       - name: Write value to Properties-file
         uses: christian-draeger/write-properties@1.0.1
         with:
           path: "${{ env.WORK_DIR }}/src/main/resources/application.properties"
           property: 'aws.access-key'
-          value: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          value: ${{ vars.AWS_ACCESS_KEY_ID }}
 
       - name: Write value to Properties-file
         uses: christian-draeger/write-properties@1.0.1
@@ -99,6 +93,20 @@ jobs:
           path: "${{ env.WORK_DIR }}/src/main/resources/application.properties"
           property: 'aws.access-secret-key'
           value: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Write value to Properties-file
+        uses: christian-draeger/write-properties@1.0.1
+        with:
+          path: "${{ env.WORK_DIR }}/src/main/resources/application.properties"
+          property: 'google.oauth2.clientId'
+          value: ${{ vars.GOOGLE_OAUTH2_CLIENT_ID }}
+
+      - name: Write value to Properties-file
+        uses: christian-draeger/write-properties@1.0.1
+        with:
+          path: "${{ env.WORK_DIR }}/src/main/resources/application.properties"
+          property: 'google.oauth2.clientSecret'
+          value: ${{ secrets.GOOGLE_OAUTH2_CLIENT_SECRET }}
 
       - name: Run build with Gradle Wrapper
         working-directory: ${{ env.WORK_DIR }}
@@ -113,7 +121,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
+          aws-region: ${{ vars.AWS_REGION }}
 
       - name: Login to Amazon ECR
         id: login-ecr
@@ -133,7 +141,7 @@ jobs:
       - name: Download task definition
         working-directory: ${{ env.WORK_DIR }}
         env:
-          TASK_DEF: ${{ env.ECS_TASK_DEFINITION }}
+          TASK_DEF: ${{ vars.ECS_TASK_DEFINITION }}
         run: |
           aws ecs describe-task-definition --task-definition $TASK_DEF --query taskDefinition > task-definition.json
 
@@ -142,13 +150,13 @@ jobs:
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
           task-definition: "${{ env.WORK_DIR }}/task-definition.json"
-          container-name: ${{ env.CONTAINER_NAME }}
+          container-name: ${{ vars.CONTAINER_NAME }}
           image: ${{ steps.build-image.outputs.image }}
 
       - name: Deploy Amazon ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1.4.10
         with:
           task-definition: ${{ steps.task-def.outputs.task-definition }}
-          service: ${{ env.ECS_SERVICE }}
-          cluster: ${{ env.ECS_CLUSTER }}
+          service: ${{ vars.ECS_SERVICE }}
+          cluster: ${{ vars.ECS_CLUSTER }}
           wait-for-service-stability: true

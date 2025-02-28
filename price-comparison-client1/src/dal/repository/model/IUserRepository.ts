@@ -1,7 +1,7 @@
-import { ILoginInfo } from '@/dal/domain/ILoginInfo'
-import { IServiceResult } from '@/bll/service/model/IServiceResult'
-import { IJwtResponse } from '@/dal/domain/IJwtResponse'
-import { IRegisterInfo } from '@/dal/domain/IRegisterInfo'
+import type { ILoginInfo } from '@/dal/domain/ILoginInfo'
+import type { IServiceResult } from '@/bll/service/model/IServiceResult'
+import type { IJwtResponse } from '@/dal/domain/IJwtResponse'
+import type { IRegisterInfo } from '@/dal/domain/IRegisterInfo'
 
 /**
  * @author Ahto Jalak

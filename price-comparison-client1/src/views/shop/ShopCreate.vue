@@ -57,123 +57,139 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component'
 import { ShopService } from '@/bll/service/ShopService'
 import Logger from '@/util/logger'
 import router from '@/router'
-import { IShop } from '@/dal/domain/IShop'
+import type { IShop } from '@/dal/domain/IShop'
 import { useShopStore } from '@/stores/shop'
 import Header from '@/components/Header.vue'
 import { IdentityService } from '@/bll/service/IdentityService'
 import UploadImage from '@/components/UploadImage.vue'
+import {defineComponent} from "vue";
 
 /**
  * @author Ahto Jalak
  * @since 31.03.2023
  */
-@Options({
+export default defineComponent({
     components: {
         Header,
         UploadImage,
     },
     props: {},
     emits: [],
+    setup() {
+        const logger = new Logger("ShopCreate")
+        const shopStore = useShopStore()
+        const shopService = new ShopService()
+        const identityService = new IdentityService()
+        const name = ''
+        const address = ''
+        const url = ''
+        const latitude = 0
+        const longitude = 0
+
+        let errorMsg: string | null = null
+
+        return {
+            logger,
+            shopStore,
+            shopService,
+            identityService,
+            name,
+            address,
+            url,
+            latitude,
+            longitude,
+            errorMsg,
+        }
+    },
+    methods: {
+
+        submitClicked (): void {
+            this.logger.info('submitClicked')
+
+            const shopInfo: IShop = {
+                name: this.name,
+                address: this.address,
+                url: this.url,
+                latitude: this.latitude,
+                longitude: this.longitude
+            }
+            this.shopService.add(shopInfo).then((item) => {
+                if (item.errorMsg !== undefined) {
+                    this.errorMsg = item.errorMsg
+                } else {
+                    if (item.data) {
+                        this.shopStore.$state.shop = item.data
+                        this.shopStore.add(item.data)
+                    }
+                    router.push('/')
+                }
+            })
+        },
+
+        searchShop () {
+            this.logger.info('searchShop')
+
+            if (this.name.trim().length < 3) {
+                this.shopStore.$reset()
+                return
+            }
+
+            this.shopService.findByName(this.name).then((items) => {
+                this.logger.info('found something')
+                if (items.errorMsg !== undefined) {
+                    this.errorMsg = items.errorMsg
+                } else {
+                    if (items.data) {
+                        this.shopStore.$state.shops = items.data
+                    }
+                }
+            })
+        },
+
+        getShopList () {
+            return this.shopStore.$state.shops
+        },
+
+        clickGeolocation () {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    position => {
+                        this.logger.info(`Location: ${position.coords.latitude} ${position.coords.longitude}`)
+                        this.latitude = position.coords.latitude
+                        this.longitude = position.coords.longitude
+                    },
+                    error => {
+                        this.logger.error(error.message)
+                    })
+            } else {
+                this.logger.warn('your browser does not support geolocation')
+            }
+        },
+
+        clickTallinnLocation () {
+            this.latitude = 59.436962
+            this.longitude = 24.753574
+        },
+
+        isAuthenticated (): boolean {
+            return this.identityService.isAuthenticated()
+        },
+
+        getCategoryImageByType (id: string) {
+            return `/images/category/${id}.png`
+        },
+
+        getShopImageByType (id: string) {
+            return `/images/shop/${id}`
+        },
+
+        getProductImageByBarcode (id: string) {
+            return `/images/product/${id}.jpg`
+        }
+    }
+
 })
-export default class ShopCreate extends Vue {
-    private logger = new Logger(ShopCreate.name)
-    private shopStore = useShopStore()
-    private shopService = new ShopService()
-    private identityService = new IdentityService()
-    name = ''
-    address = ''
-    url = ''
-    latitude = 0
-    longitude = 0
-
-    errorMsg: string | null = null
-
-    submitClicked (): void {
-        this.logger.info('submitClicked')
-
-        const shopInfo: IShop = {
-            name: this.name,
-            address: this.address,
-            url: this.url,
-            latitude: this.latitude,
-            longitude: this.longitude
-        }
-        this.shopService.add(shopInfo).then((item) => {
-            if (item.errorMsg !== undefined) {
-                this.errorMsg = item.errorMsg
-            } else {
-                if (item.data) {
-                    this.shopStore.$state.shop = item.data
-                    this.shopStore.add(item.data)
-                }
-                router.push('/')
-            }
-        })
-    }
-
-    searchShop () {
-        this.logger.info('searchShop')
-
-        if (this.name.trim().length < 3) {
-            this.shopStore.$reset()
-            return
-        }
-
-        this.shopService.findByName(this.name).then((items) => {
-            this.logger.info('found something')
-            if (items.errorMsg !== undefined) {
-                this.errorMsg = items.errorMsg
-            } else {
-                if (items.data) {
-                    this.shopStore.$state.shops = items.data
-                }
-            }
-        })
-    }
-
-    getShopList () {
-        return this.shopStore.$state.shops
-    }
-
-    clickGeolocation () {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                position => {
-                    this.logger.info(`Location: ${position.coords.latitude} ${position.coords.longitude}`)
-                    this.latitude = position.coords.latitude
-                    this.longitude = position.coords.longitude
-                },
-                error => {
-                    this.logger.error(error.message)
-                })
-        } else {
-            this.logger.warn('your browser does not support geolocation')
-        }
-    }
-
-    clickTallinnLocation () {
-        this.latitude = 59.436962
-        this.longitude = 24.753574
-    }
-
-    get isAuthenticated (): boolean {
-        return this.identityService.isAuthenticated()
-    }
-
-    getCategoryImageByType (id: string) {
-        return `/images/category/${id}.png`
-    }
-
-    getShopImageByType (id: string) {
-        return `/images/shop/${id}`
-    }
-
-    getProductImageByBarcode (id: string) {
-        return `/images/product/${id}.jpg`
-    }
-}
 </script>

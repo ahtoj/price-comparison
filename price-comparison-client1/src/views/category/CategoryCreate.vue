@@ -43,62 +43,70 @@
 <script lang="ts">
 import { CategoryService } from '@/bll/service/CategoryService'
 import { useCategoryStore } from '@/stores/category'
-import { Options, Vue } from 'vue-class-component'
-import { ICategory } from '@/dal/domain/ICategory'
+import type { ICategory } from '@/dal/domain/ICategory'
 import router from '@/router'
 import Logger from '@/util/logger'
 import UploadImage from '@/components/UploadImage.vue'
+import {defineComponent, onMounted} from "vue";
 
 /**
  * @author Ahto Jalak
  * @since 06.02.2023
  */
-@Options({
+export default defineComponent({
     components: {
         UploadImage,
     },
     props: {},
     emits: [],
-})
-export default class CategoryCreate extends Vue {
-    private logger = new Logger(CategoryCreate.name)
-    categoriesStore = useCategoryStore()
-    categoryService = new CategoryService()
+    setup () {
+        const logger = new Logger("CategoryCreate")
+        const categoriesStore = useCategoryStore()
+        const categoryService = new CategoryService()
 
-    categories: ICategory[] = []
-    categoryParentCategoryId: number | null = null
-    categoryName: string | null = null
-    errorMsg: string | null = null
+        const categories: ICategory[] = []
+        const categoryParentCategoryId: number | null = null
+        const categoryName: string | null = null
+        let errorMsg: string | null = null
 
-    async mounted (): Promise<void> {
-        this.logger.info('mounted')
-        this.categories.push({
-            id: 0,
-            name: '--- no parent category ---'
-        })
-        this.categoryService.getAllByCategoryId(null).then((res) => {
-            if (res.data) {
-                for (const item of res.data) {
-                    this.categories.push(item)
+        onMounted(()=> {
+            logger.info('mounted')
+            categories.push({
+                id: 0,
+                name: '--- no parent category ---'
+            })
+            categoryService.getAllByCategoryId(null).then((res) => {
+                if (res.data) {
+                    for (const item of res.data) {
+                        categories.push(item)
+                    }
                 }
-            }
+            })
         })
-    }
 
-    submitClicked (): void {
-        this.logger.info('submitClicked')
-        const category = {
-            parentCategoryId: this.categoryParentCategoryId,
-            name: this.categoryName,
-        } as ICategory
-        this.categoryService.add(category).then(res => {
-            if (res.data == null) {
-                this.errorMsg = res.status + ' ' + res.errorMsg
-            } else {
-                this.categoriesStore.$state.categories.push(res.data)
-                router.push('/category')
-            }
-        })
+        return {
+            logger,
+            categoriesStore,
+            categoryService,
+            categories,
+            categoryParentCategoryId,
+            categoryName,
+            errorMsg,
+        }
+    },
+    methods: {
+        submitClicked (): void {
+            this.logger.info('submitClicked')
+            const category = {parentCategoryId: this.categoryParentCategoryId, name: this.categoryName} as ICategory
+            this.categoryService.add(category).then(res => {
+                if (res.data == null) {
+                    this.errorMsg = res.status + ' ' + res.errorMsg
+                } else {
+                    this.categoriesStore.$state.categories.push(res.data)
+                    router.push('/category')
+                }
+            })
+        }
     }
-}
+})
 </script>

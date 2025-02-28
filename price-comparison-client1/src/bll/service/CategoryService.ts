@@ -1,7 +1,7 @@
 import type { ICategory } from '@/dal/domain/ICategory'
-import { ICategoryService } from '@/bll/service/model/ICategoryService'
+import type { ICategoryService } from '@/bll/service/model/ICategoryService'
 import { CategoryRepository } from '@/dal/repository/CategoryRepository'
-import { IServiceResult } from '@/bll/service/model/IServiceResult'
+import type { IServiceResult } from '@/bll/service/model/IServiceResult'
 
 /**
  * @author Ahto Jalak

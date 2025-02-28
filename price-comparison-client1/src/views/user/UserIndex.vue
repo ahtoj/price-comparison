@@ -28,22 +28,26 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component'
 import { UserService } from '@/bll/service/UserService'
 import { useUserStore } from '@/stores/user'
 import Logger from '@/util/logger'
-import { IUser } from '@/dal/domain/IUser'
+import type { IUser } from '@/dal/domain/IUser'
+import {defineComponent} from "vue";
 
 /**
  * @author Ahto Jalak
  * @since 06.02.2023
  */
-@Options({
-    components: {},
-    props: {},
-    emits: [],
-})
-export default class UserIndex extends Vue {
+export default defineComponent({
+    setup() {
+        onMounted(() => {
+
+        })
+
+        return {
+
+        }
+    },
     private logger = new Logger(UserIndex.name)
     userStore = useUserStore()
     userService = new UserService()

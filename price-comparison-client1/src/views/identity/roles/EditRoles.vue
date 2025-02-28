@@ -33,35 +33,46 @@
     </div>
 </template>
 
-<script>
-import { Vue } from 'vue-class-component'
+<script lang="ts">
 import { useIdentityStore } from '@/stores/identity'
 import router from '@/router'
 import Logger from '@/util/logger'
+import {defineComponent} from "vue";
 
-export default class EditRoles extends Vue {
-    private logger = new Logger(EditRoles.name)
-    private identityStore = useIdentityStore()
-    private wasOk: boolean | null = null
-
-    email = ''
-    password = ''
-    errorMsg: string | null = null
-
-    submitClicked (): void {
-        this.logger.info('submitClicked')
-        const info = {
-            email: this.email,
-            password: this.password
+export default defineComponent({
+    setup() {
+        const logger = new Logger("EditRoles")
+        const identityStore = useIdentityStore()
+        const wasOk: boolean | null = null
+        //
+        const email = ''
+        const password = ''
+        let errorMsg: string | null = null
+        return {
+            logger,
+            identityStore,
+            email,
+            password,
+            wasOk,
+            errorMsg,
         }
-        this.identityStore.setUserRole(info)
-            .then((isLoggedIn: boolean) => {
-                this.wasOk = isLoggedIn
-                this.logger.info('after auth user got: ' + this.wasOk)
-            })
-        router.push('/')
+    },
+    methods: {
+        submitClicked (): void {
+            this.logger.info('submitClicked')
+            const info = {
+                email: this.email,
+                password: this.password
+            }
+            this.identityStore.setUserRole(info)
+                .then((isLoggedIn: boolean) => {
+                    this.wasOk = isLoggedIn
+                    this.logger.info('after auth user got: ' + this.wasOk)
+                })
+            router.push('/')
+        }
     }
-}
+})
 </script>
 
 <style scoped>

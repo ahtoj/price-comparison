@@ -1,33 +1,33 @@
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component'
 import { OfferService } from '@/bll/service/OfferService'
 import { useOfferStore } from '@/stores/offer'
 import { IdentityService } from '@/bll/service/IdentityService'
-import { IOffer } from '@/dal/domain/IOffer'
-import { IPrice } from '@/dal/domain/IPrice'
-import { IShop } from '@/dal/domain/IShop'
+import type { IOffer } from '@/dal/domain/IOffer'
+import type { IPrice } from '@/dal/domain/IPrice'
+import type { IShop } from '@/dal/domain/IShop'
 import { ShopService } from '@/bll/service/ShopService'
 import { useShopStore } from '@/stores/shop'
 import { useIdentityStore } from '@/stores/identity'
 import { useProductStore } from '@/stores/product'
 import { ProductService } from '@/bll/service/ProductService'
-import { ICategory } from '@/dal/domain/ICategory'
+import type { ICategory } from '@/dal/domain/ICategory'
 import { CategoryService } from '@/bll/service/CategoryService'
 import { useCategoryStore } from '@/stores/category'
 import HttpClient from '@/util/http-client'
-import Papa from 'papaparse'
 import Logger from '@/util/logger'
 import Header from '@/components/Header.vue'
 import router from '@/router'
 import DistanceUtil from '@/util/distance-util'
 import UploadImage from '@/components/UploadImage.vue'
 import BarcodeScanner from '@/components/BarcodeScanner.vue'
+import {defineComponent, onMounted} from "vue";
+import {parse} from "papaparse";
 
 /**
  * @author Ahto Jalak
  * @since 06.02.2023
  */
-@Options({
+export default defineComponent({
     components: {
         BarcodeScanner,
         Header,
@@ -42,6 +42,119 @@ import BarcodeScanner from '@/components/BarcodeScanner.vue'
             progress: 0,
         }
     },
+    setup(props) {
+        const logger = new Logger("OfferCreate")
+        const offerStore = useOfferStore()
+        const offerService = new OfferService()
+        const identityStore = useIdentityStore()
+        const identityService = new IdentityService()
+        const shopService = new ShopService()
+        const productService = new ProductService()
+        const categoryService = new CategoryService()
+        const shopStore = useShopStore()
+        const productStore = useProductStore()
+        const categoryStore = useCategoryStore()
+        const distanceUtil = new DistanceUtil()
+
+        const showScanner = false
+        const showScanner2 = false
+        let errorMsg: string | null = null
+        const uploadFile = ''
+        const parsed = false
+        const shopId: number | undefined = undefined
+        const categoryId: number | undefined = undefined
+        const price: number | undefined = undefined
+        let name: string | undefined = undefined
+        let barcode: string | undefined = undefined
+        const productImage: string | undefined = undefined
+        const id = props.id
+
+        onMounted(() => {
+            logger.info('mounted')
+            const distanceUtil = new DistanceUtil()
+
+            if (id) {
+                productService.getById(id).then((item) => {
+                    if (item.errorMsg !== undefined) {
+                        errorMsg = item.errorMsg
+                    } else {
+                        if (item.data) {
+                            productStore.$state.product = item.data
+                        }
+                    }
+                })
+            }
+
+            shopService.getAll().then((items) => {
+                if (items.errorMsg !== undefined) {
+                    errorMsg = items.errorMsg
+                } else {
+                    const uniqueNodes = items.data
+                    if (uniqueNodes && identityStore.getCoords()) {
+                        for (let i = 0; i < uniqueNodes.length; i++) {
+                            uniqueNodes[i].distance = distanceUtil.calculateDistance(
+                                identityStore.getCoords().latitude ?? 59.436962,
+                                identityStore.getCoords().longitude ?? 24.753574,
+                                uniqueNodes[i].latitude ?? 59.436962,
+                                uniqueNodes[i].longitude ?? 24.753574,
+                                'K'
+                            )
+                        }
+
+                        uniqueNodes.sort(function (a, b) {
+                            return (a.distance ?? 0) - (b.distance ?? 0)
+                        })
+
+                        shopStore.$state.shops = uniqueNodes
+                    }
+                }
+            })
+
+            categoryService.getAll().then((item) => {
+                if (item.errorMsg !== undefined) {
+                    errorMsg = item.errorMsg
+                } else {
+                    if (item.data) {
+                        categoryStore.$state.categories = item.data
+                    }
+                }
+            })
+
+            const initialOffer = offerStore.$state.offer
+            if (initialOffer.name) {
+                name = initialOffer.name
+            }
+            if (initialOffer.barcode) {
+                barcode = initialOffer.barcode
+            }
+        })
+
+        return {
+            logger,
+            offerStore,
+            offerService,
+            identityStore,
+            identityService,
+            shopService,
+            shopStore,
+            productService,
+            categoryService,
+            categoryStore,
+            distanceUtil,
+            showScanner,
+            showScanner2,
+            errorMsg,
+            uploadFile,
+            parsed,
+            shopId,
+            categoryId,
+            price,
+            name,
+            barcode,
+            productImage,
+            id,
+        }
+    },
     methods: {
         onScan (decodedText: any, decodedResult: any) {
             this.logger.info('onscannn')
@@ -49,197 +162,109 @@ import BarcodeScanner from '@/components/BarcodeScanner.vue'
             this.logger.info(decodedResult)
             this.showScanner = false
         },
-    },
-})
-export default class OfferCreate extends Vue {
-    private logger = new Logger(OfferCreate.name)
-    offerStore = useOfferStore()
-    offerService = new OfferService()
-    private identityStore = useIdentityStore()
-    private identityService = new IdentityService()
-    private shopService = new ShopService()
-    private productService = new ProductService()
-    private categoryService = new CategoryService()
-    private shopStore = useShopStore()
-    private productStore = useProductStore()
-    private categoryStore = useCategoryStore()
-    distanceUtil = new DistanceUtil()
 
-    showScanner = false
-    showScanner2 = false
-    errorMsg: string | null = null
-    uploadFile = ''
-    content = []
-    parsed = false
-    shopId: number | undefined = undefined
-    categoryId: number | undefined = undefined
-    price: number | undefined = undefined
-    name: string | undefined = undefined
-    barcode: string | undefined = undefined
-    productImage: string | undefined = undefined
-    id!: number
+        async submitClicked (): Promise<void> {
+            this.logger.info('submitClicked')
 
-    async submitClicked (): Promise<void> {
-        this.logger.info('submitClicked')
-
-        const obj: IOffer = {
-            name: this.name,
-            barcode: this.barcode,
-            productId: this.id,
-            shopId: this.shopId,
-            categoryId: this.categoryId,
-            price: {
-                amount: this.price
-            } as IPrice,
-        }
-        this.logger.info(obj as string)
-
-        if (this.offerStore.$state.uploadedImage) {
-            fetch(this.offerStore.$state.uploadedImage)
-                .then(res => res.blob())
-                .then(blob => {
-                    this.offerService
-                        .upload(this.barcode ?? '', blob, 0)
-                        .then(r => {
-                            if (r.data) {
-                                this.logger.log(r.data)
-                            }
-                        })
-                })
-                .catch(err => console.log(err))
-        }
-
-        await this.offerService.add(obj).then((item) => {
-            if (item.errorMsg !== undefined) {
-                this.errorMsg = item.errorMsg
-            } else {
-                if (item.data) {
-                    router.push('/product/details/' + item.data.productId)
-                }
+            const obj: IOffer = {
+                name: this.name,
+                barcode: this.barcode,
+                productId: this.id,
+                shopId: this.shopId,
+                categoryId: this.categoryId,
+                price: {
+                    amount: this.price
+                } as IPrice,
             }
-        })
-    }
+            this.logger.info(obj as string)
 
-    mounted (): void {
-        this.logger.info('mounted')
-        const distanceUtil = new DistanceUtil()
+            if (this.offerStore.$state.uploadedImage) {
+                fetch(this.offerStore.$state.uploadedImage)
+                    .then(res => res.blob())
+                    .then(blob => {
+                        this.offerService
+                            .upload(this.barcode ?? '', blob, 0)
+                            .then((r:any) => {
+                                if (r.data) {
+                                    this.logger.log(r.data)
+                                }
+                            })
+                    })
+                    .catch(err => console.log(err))
+            }
 
-        if (this.id) {
-            this.productService.getById(this.id).then((item) => {
+            await this.offerService.add(obj).then((item : any) => {
                 if (item.errorMsg !== undefined) {
                     this.errorMsg = item.errorMsg
                 } else {
                     if (item.data) {
-                        this.productStore.$state.product = item.data
+                        router.push('/product/details/' + item.data.productId)
                     }
                 }
             })
-        }
+        },
 
-        this.shopService.getAll().then((items) => {
-            if (items.errorMsg !== undefined) {
-                this.errorMsg = items.errorMsg
-            } else {
-                const uniqueNodes = items.data
-                if (uniqueNodes && this.identityStore.getCoords()) {
-                    for (let i = 0; i < uniqueNodes.length; i++) {
-                        uniqueNodes[i].distance = distanceUtil.calculateDistance(
-                            this.identityStore.getCoords().latitude ?? 59.436962,
-                            this.identityStore.getCoords().longitude ?? 24.753574,
-                            uniqueNodes[i].latitude ?? 59.436962,
-                            uniqueNodes[i].longitude ?? 24.753574,
-                            'K'
-                        )
+        getShopList (): IShop[] {
+            return this.shopStore.$state.shops
+        },
+
+        getCategoryList (): ICategory[] {
+            return this.categoryStore.$state.categories
+        },
+
+        parseFile () {
+            parse(this.uploadFile, {
+                header: true,
+                skipEmptyLines: true,
+                complete: (results: any) => {
+                    this.content = results
+                    this.parsed = true
+                }
+            })
+        },
+
+        async submitFile () {
+            const formData = new FormData()
+
+            formData.append('file', this.uploadFile)
+
+            await HttpClient.post('/preview-file',
+                formData,
+                {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
                     }
-
-                    uniqueNodes.sort(function (a, b) {
-                        return (a.distance ?? 0) - (b.distance ?? 0)
-                    })
-
-                    this.shopStore.$state.shops = uniqueNodes
                 }
-            }
-        })
+            )
+        },
 
-        this.categoryService.getAll().then((item) => {
-            if (item.errorMsg !== undefined) {
-                this.errorMsg = item.errorMsg
-            } else {
-                if (item.data) {
-                    this.categoryStore.$state.categories = item.data
-                }
-            }
-        })
+        get isAuthenticated (): boolean {
+            return this.identityService.isAuthenticated()
+        },
 
-        const initialOffer = this.offerStore.$state.offer
-        if (initialOffer.name) {
-            this.name = initialOffer.name
+        getProduct () {
+            return this.productStore.$state.product
+        },
+
+        getCategoryImageByType (id: string) {
+            return `/images/category/${id}.png`
+        },
+
+        getShopImageByType (url: string) {
+            return `/images/shop/${url}`
+        },
+
+        getProductImageByBarcode (id: string) {
+            return `/images/product/${id}.jpg`
+        },
+
+        goToImports () {
+            router.push({
+                name: 'product-import'
+            })
         }
-        if (initialOffer.barcode) {
-            this.barcode = initialOffer.barcode
-        }
     }
-
-    getShopList (): IShop[] {
-        return this.shopStore.$state.shops
-    }
-
-    getCategoryList (): ICategory[] {
-        return this.categoryStore.$state.categories
-    }
-
-    parseFile () {
-        Papa.parse(this.uploadFile, {
-            header: true,
-            skipEmptyLines: true,
-            complete: (results: any) => {
-                this.content = results
-                this.parsed = true
-            }
-        })
-    }
-
-    async submitFile () {
-        const formData = new FormData()
-
-        formData.append('file', this.uploadFile)
-
-        await HttpClient.post('/preview-file',
-            formData,
-            {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
-            }
-        )
-    }
-
-    get isAuthenticated (): boolean {
-        return this.identityService.isAuthenticated()
-    }
-
-    getProduct () {
-        return this.productStore.$state.product
-    }
-
-    getCategoryImageByType (id: string) {
-        return `/images/category/${id}.png`
-    }
-
-    getShopImageByType (url: string) {
-        return `/images/shop/${url}`
-    }
-
-    getProductImageByBarcode (id: string) {
-        return `/images/product/${id}.jpg`
-    }
-
-    goToImports () {
-        router.push({
-            name: 'product-import'
-        })
-    }
-}
+})
 </script>
 
 <style>

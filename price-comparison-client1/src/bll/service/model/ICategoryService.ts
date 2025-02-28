@@ -1,5 +1,5 @@
-import { ICategory } from '@/dal/domain/ICategory'
-import { IServiceResult } from '@/bll/service/model/IServiceResult'
+import type { ICategory } from '@/dal/domain/ICategory'
+import type { IServiceResult } from '@/bll/service/model/IServiceResult'
 
 /**
  * @author Ahto Jalak

@@ -23,44 +23,54 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component'
 import { CustomerService } from '@/bll/service/CustomerService'
 import { MetricService } from '@/bll/service/MetricService'
 import { useMetricStore } from '@/stores/metric'
 import Logger from '@/util/logger'
+import router from "@/router";
+import {defineComponent} from "vue";
 
 /**
  * @author Ahto Jalak
  * @since 06.02.2023
  */
-@Options({
+export default defineComponent({
     components: {},
     props: {},
     emits: [],
-})
-export default class MetricCreate extends Vue {
-    private logger = new Logger(MetricCreate.name)
-    wishesStore = useMetricStore()
-    wishService = new MetricService()
-    customerService = new CustomerService()
+    setup() {
+        const logger = new Logger("MetricCreate")
+        const wishesStore = useMetricStore()
+        const wishService = new MetricService()
+        const customerService = new CustomerService()
 
-    errorMsg: string | null = null
+        let errorMsg: string | null = null
 
-    async submitClicked (): Promise<void> {
-        this.logger.info('submitClicked')
+        return {
+            logger,
+            wishesStore,
+            wishService,
+            customerService,
+            errorMsg,
+        }
+    },
+    methods: {
+        async submitClicked (): Promise<void> {
+            this.logger.info('submitClicked')
 
-        const res = await this.wishService.add(
-            {}
-        )
+            const res = await this.wishService.add(
+                {}
+            )
 
-        if (res.status == null || res.status >= 300) {
-            this.errorMsg = res.status + ' ' + res.errorMsg
-        } else {
-            // this.wishesStore.$state.wishes =
-            //     await this.wishService.getAll()
+            if (res.status == null || res.status >= 300) {
+                this.errorMsg = res.status + ' ' + res.errorMsg
+            } else {
+                // this.wishesStore.$state.wishes =
+                //     await this.wishService.getAll()
 
-            this.$router.push('/wishes')
+                await router.push('/wishes')
+            }
         }
     }
-}
+})
 </script>

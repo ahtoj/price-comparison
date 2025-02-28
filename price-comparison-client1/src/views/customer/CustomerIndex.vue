@@ -14,7 +14,7 @@
         <tbody>
         <tr v-for="item of customersStore.customers" :key="item.id">
             <td>{{ item.id }}</td>
-            <td>{{ item.customerId }}</td>
+            <td>{{ item.id }}</td>
             <td>
                 <RouterLink :to="{ name: 'customers-details', params: { id: item.id } }">Details</RouterLink>
                 |
@@ -30,28 +30,25 @@
 <script lang="ts">
 import { CustomerService } from '@/bll/service/CustomerService'
 import { useCustomerStore } from '@/stores/customer'
-import { Options, Vue } from 'vue-class-component'
 import Logger from '@/util/logger'
+import {defineComponent} from "vue";
 
 /**
  * @author Ahto Jalak
  * @since 06.02.2023
  */
-@Options({
-    components: {},
-    props: {},
-    emits: [],
-})
-export default class CustomerIndex extends Vue {
-    private logger = new Logger(CustomerIndex.name)
-    customersStore = useCustomerStore()
-    customerService = new CustomerService()
+export default defineComponent({
+    setup() {
+        const logger = new Logger("CustomerIndex")
+        const customersStore = useCustomerStore()
+        const customerService = new CustomerService()
 
-    async mounted (): Promise<void> {
-        this.logger.info('mounted')
-        // this.customersStore.$state.customers =
-        //     await this.customerService.getAll()
+        return {
+            logger,
+            customersStore,
+            customerService,
+        }
     }
-}
+})
 
 </script>

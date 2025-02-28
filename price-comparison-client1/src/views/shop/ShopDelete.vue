@@ -23,49 +23,58 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component'
 import { ShopService } from '@/bll/service/ShopService'
 import { useShopStore } from '@/stores/shop'
 import Logger from '@/util/logger'
+import {defineComponent} from "vue";
 
 /**
  * @author Ahto Jalak
  * @since 31.03.2023
  */
-@Options({
+export default defineComponent({
     components: {},
     props: {
         id: String
     },
     emits: [],
-})
-export default class ShopDelete extends Vue {
-    private logger = new Logger(ShopDelete.name)
-    id!: string
-    shopStore = useShopStore()
-    ratingService = new ShopService()
+    setup(props : any) {
+        const logger = new Logger("ShopDelete")
+        const id = props.id
+        const shopStore = useShopStore()
+        const ratingService = new ShopService()
 
-    errorMsg: string | null = null
+        const errorMsg: string | null = null
 
-    async submitClicked (): Promise<void> {
-        this.logger.info('submitClicked')
-
-        // await this.ratingService
-        //     .delete(this.id)
-        //     .then(() => {
-        //         router.push('/shop')
-        //     })
-
-        /*
-        if (res.status >= 300) {
-            this.errorMsg = res.status + ' ' + res.errorMsg
-        } else {
-            this.shopStore.$state.shops =
-                await this.ratingService.getAll()
-
-            this.$router.push('/shop')
+        return {
+            logger,
+            id,
+            shopStore,
+            ratingService,
+            errorMsg,
         }
-         */
+    },
+    methods: {
+        async submitClicked (): Promise<void> {
+            this.logger.info('submitClicked')
+
+            // await this.ratingService
+            //     .delete(this.id)
+            //     .then(() => {
+            //         router.push('/shop')
+            //     })
+
+            /*
+            if (res.status >= 300) {
+                this.errorMsg = res.status + ' ' + res.errorMsg
+            } else {
+                this.shopStore.$state.shops =
+                    await this.ratingService.getAll()
+
+                this.$router.push('/shop')
+            }
+             */
+        }
     }
-}
+})
 </script>

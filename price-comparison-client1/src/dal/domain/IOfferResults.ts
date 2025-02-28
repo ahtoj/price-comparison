@@ -1,5 +1,5 @@
-import { IShop } from '@/dal/domain/IShop'
-import { IOffer } from '@/dal/domain/IOffer'
+import type { IShop } from '@/dal/domain/IShop'
+import type { IOffer } from '@/dal/domain/IOffer'
 
 /**
  * @author Ahto Jalak

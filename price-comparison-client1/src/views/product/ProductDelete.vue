@@ -21,43 +21,52 @@
 <script lang="ts">
 import { ProductService } from '@/bll/service/ProductService'
 import { useProductStore } from '@/stores/product'
-import { Options, Vue } from 'vue-class-component'
 import Logger from '@/util/logger'
+import {defineComponent} from "vue";
 
 /**
  * @author Ahto Jalak
  * @since 06.02.2023
  */
-@Options({
+export default defineComponent({
     components: {},
     props: {
         id: String
     },
     emits: [],
-})
-export default class ProductDelete extends Vue {
-    private logger = new Logger(ProductDelete.name)
-    id!: string
-    productsStore = useProductStore()
-    productService = new ProductService()
+    setup(props:any) {
+        const logger = new Logger("ProductDelete")
+        const id = props.id
+        const productsStore = useProductStore()
+        const productService = new ProductService()
 
-    errorMsg: string | null = null
+        const errorMsg: string | null = null
 
-    async submitClicked (): Promise<void> {
-        this.logger.info('submitClicked')
-
-        // await this.productService.delete(this.id)
-
-        /*
-        if (res.status >= 300) {
-            this.errorMsg = res.status + ' ' + res.errorMsg
-        } else {
-            this.productsStore.$state.products =
-                await this.productService.getAll()
-
-            this.$router.push('/products')
+        return {
+            logger,
+            id,
+            productsStore,
+            productService,
+            errorMsg,
         }
-         */
+    },
+    methods: {
+        async submitClicked (): Promise<void> {
+            this.logger.info('submitClicked')
+
+            // await this.productService.delete(this.id)
+
+            /*
+            if (res.status >= 300) {
+                this.errorMsg = res.status + ' ' + res.errorMsg
+            } else {
+                this.productsStore.$state.products =
+                    await this.productService.getAll()
+
+                this.$router.push('/products')
+            }
+             */
+        }
     }
-}
+})
 </script>

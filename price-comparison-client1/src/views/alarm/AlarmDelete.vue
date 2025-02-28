@@ -25,43 +25,52 @@
 <script lang="ts">
 import { AlarmService } from '@/bll/service/AlarmService'
 import { useAlarmStore } from '@/stores/alarm'
-import { Options, Vue } from 'vue-class-component'
 import Logger from '@/util/logger'
+import {defineComponent} from "vue";
 
 /**
  * @author Ahto Jalak
  * @since 06.02.2023
  */
-@Options({
+export default defineComponent({
     components: {},
     props: {
         id: Number,
     },
     emits: [],
-})
-export default class AlarmDelete extends Vue {
-    private logger = new Logger(AlarmDelete.name)
-    id!: number
-    alarmsStore = useAlarmStore()
-    alarmService = new AlarmService()
+    setup(props: any) {
+        const logger = new Logger("AlarmDelete")
+        const id = props.id
+        const alarmsStore = useAlarmStore()
+        const alarmService = new AlarmService()
 
-    errorMsg: string | null = null
+        const errorMsg: string | null = null
 
-    async submitClicked (): Promise<void> {
-        this.logger.info('submitClicked')
-
-        await this.alarmService.delete(this.id)
-
-        /*
-        if (res.status >= 300) {
-            this.errorMsg = res.status + ' ' + res.errorMsg
-        } else {
-            this.alarmsStore.$state.alarms =
-                await this.alarmService.getAll()
-
-            this.$router.push('/alarms')
+        return {
+            logger,
+            id,
+            alarmsStore,
+            alarmService,
+            errorMsg,
         }
-         */
+    },
+    methods: {
+        async submitClicked (): Promise<void> {
+            this.logger.info('submitClicked')
+
+            await this.alarmService.delete(this.id)
+
+            /*
+            if (res.status >= 300) {
+                this.errorMsg = res.status + ' ' + res.errorMsg
+            } else {
+                this.alarmsStore.$state.alarms =
+                    await this.alarmService.getAll()
+
+                this.$router.push('/alarms')
+            }
+             */
+        }
     }
-}
+})
 </script>

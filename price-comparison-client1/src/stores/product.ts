@@ -1,13 +1,12 @@
 import type { IProduct } from '@/dal/domain/IProduct'
 import { defineStore } from 'pinia'
-import { IOffer } from '@/dal/domain/IOffer'
+import type { IOffer } from '@/dal/domain/IOffer'
 
 /**
  * @author Ahto Jalak
  * @since 06.02.2023
  */
-export const useProductStore = defineStore({
-    id: 'products',
+export const useProductStore = defineStore('products', {
     state: () => ({
         product: {} as IProduct,
         products: [] as IProduct[],
@@ -20,6 +19,7 @@ export const useProductStore = defineStore({
     }),
     getters: {
         productCount: (state) => state.products.length,
+        products: (state) => state.products,
     },
     actions: {
         add (product: IProduct) {

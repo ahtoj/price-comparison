@@ -5,8 +5,7 @@ import { defineStore } from 'pinia'
  * @author Ahto Jalak
  * @since 06.02.2023
  */
-export const useOfferStore = defineStore({
-    id: 'offers',
+export const useOfferStore = defineStore('offers', {
     state: () => ({
         offer: {} as IOffer,
         offers: [] as IOffer[],

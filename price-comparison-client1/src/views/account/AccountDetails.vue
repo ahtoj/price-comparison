@@ -20,31 +20,32 @@
 <script lang="ts">
 import { AccountService } from '@/bll/service/AccountService'
 import { useAccountStore } from '@/stores/account'
-import { Options, Vue } from 'vue-class-component'
 import Logger from '@/util/logger'
+import {defineComponent} from "vue";
 
 /**
  * @author Ahto Jalak
  * @since 06.02.2023
  */
-@Options({
+export default defineComponent({
     components: {},
     props: {
         id: String
     },
     emits: [],
-})
-export default class AccountDetails extends Vue {
-    private logger = new Logger(AccountDetails.name)
-    id!: string
-    accountsStore = useAccountStore()
-    accountService = new AccountService()
+    setup(props: any) {
+        const logger = new Logger("AccountDetails")
+        const id = props.id
+        const accountsStore = useAccountStore()
+        const accountService = new AccountService()
 
-    async mounted (): Promise<void> {
-        this.logger.info('mounted')
-        // this.accountsStore.$state.account =
-        //     await this.accountService.get(this.id)
-    }
-}
+        return {
+            logger,
+            id,
+            accountsStore,
+            accountService,
+        }
+    },
+})
 
 </script>

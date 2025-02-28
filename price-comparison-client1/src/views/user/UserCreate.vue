@@ -23,44 +23,52 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component'
 import { CustomerService } from '@/bll/service/CustomerService'
 import { UserService } from '@/bll/service/UserService'
 import { useUserStore } from '@/stores/user'
 import Logger from '@/util/logger'
+import router from "@/router";
+import {defineComponent} from "vue";
 
 /**
  * @author Ahto Jalak
  * @since 06.02.2023
  */
-@Options({
-    components: {},
-    props: {},
-    emits: [],
-})
-export default class UserCreate extends Vue {
-    private logger = new Logger(UserCreate.name)
-    userStore = useUserStore()
-    userService = new UserService()
-    customerService = new CustomerService()
+export default defineComponent({
 
-    errorMsg: string | null = null
+    setup() {
+        const logger = new Logger("UserCreate")
+        const userStore = useUserStore()
+        const userService = new UserService()
+        const customerService = new CustomerService()
 
-    async submitClicked (): Promise<void> {
-        this.logger.info('submitClicked')
+        let errorMsg: string | null = null
 
-        const res = await this.userService.add(
-            {}
-        )
+        return {
+            logger,
+            userStore,
+            userService,
+            customerService,
+            errorMsg
+        }
+    },
+    methods: {
+        async submitClicked (): Promise<void> {
+            this.logger.info('submitClicked')
 
-        if (res.status == null || res.status >= 300) {
-            this.errorMsg = res.status + ' ' + res.errorMsg
-        } else {
-            // this.wishesStore.$state.wishes =
-            //     await this.wishService.getAll()
+            const res = await this.userService.add(
+                {}
+            )
 
-            this.$router.push('/wishes')
+            if (res.status == null || res.status >= 300) {
+                this.errorMsg = res.status + ' ' + res.errorMsg
+            } else {
+                // this.wishesStore.$state.wishes =
+                //     await this.wishService.getAll()
+
+                await router.push('/wishes')
+            }
         }
     }
-}
+})
 </script>

@@ -18,33 +18,40 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component'
 import { useShopStore } from '@/stores/shop'
 import { ShopService } from '@/bll/service/ShopService'
 import Logger from '@/util/logger'
+import {defineComponent, onMounted} from "vue";
 
 /**
  * @author Ahto Jalak
  * @since 31.03.2023
  */
-@Options({
+export default defineComponent({
     components: {},
     props: {
         id: String
     },
     emits: [],
-})
-export default class ShopDetails extends Vue {
-    private logger = new Logger(ShopDetails.name)
-    id!: string
-    shopStore = useShopStore()
-    shopService = new ShopService()
+    setup(props: any) {
+        const logger = new Logger("ShopDetails")
+        const id = props.id
+        const shopStore = useShopStore()
+        const shopService = new ShopService()
 
-    async mounted (): Promise<void> {
-        this.logger.info('mounted')
-        // const item = await this.shopService.get(this.id)
-        // this.shopStore.$state.shop = item.data as IShop
-    }
-}
+        onMounted(() => {
+            logger.info('mounted')
+            // const item = await this.shopService.get(this.id)
+            // this.shopStore.$state.shop = item.data as IShop
+        })
+
+        return {
+            logger,
+            id,
+            shopStore,
+            shopService,
+        }
+    },
+})
 
 </script>

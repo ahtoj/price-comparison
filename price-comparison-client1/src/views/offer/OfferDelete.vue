@@ -24,44 +24,53 @@
 
 <script lang="ts">
 import { OfferService } from '@/bll/service/OfferService'
-import { Options, Vue } from 'vue-class-component'
 import { useOfferStore } from '@/stores/offer'
 import Logger from '@/util/logger'
+import {defineComponent} from "vue";
 
 /**
  * @author Ahto Jalak
  * @since 06.02.2023
  */
-@Options({
+export default defineComponent({
     components: {},
     props: {
         id: Number,
     },
     emits: [],
-})
-export default class OfferDelete extends Vue {
-    private logger = new Logger(OfferDelete.name)
-    id!: number
-    merchandisesStore = useOfferStore()
-    merchandiseService = new OfferService()
+    setup(props) {
+        const logger = new Logger("OfferDelete")
+        const id = props.id
+        const merchandisesStore = useOfferStore()
+        const merchandiseService = new OfferService()
 
-    errorMsg: string | null = null
+        const errorMsg: string | null = null
 
-    async submitClicked (): Promise<void> {
-        this.logger.info('submitClicked')
-
-        await this.merchandiseService.delete(this.id)
-
-        /*
-        if (res.status >= 300) {
-            this.errorMsg = res.status + ' ' + res.errorMsg
-        } else {
-            this.merchandisesStore.$state.merchandises =
-                await this.merchandiseService.getAll()
-
-            this.$router.push('/merchandises')
+        return {
+            logger,
+            id,
+            merchandisesStore,
+            merchandiseService,
+            errorMsg,
         }
-         */
+    },
+    methods: {
+        async submitClicked (): Promise<void> {
+            this.logger.info('submitClicked')
+
+            await this.merchandiseService.delete(this.id)
+
+            /*
+            if (res.status >= 300) {
+                this.errorMsg = res.status + ' ' + res.errorMsg
+            } else {
+                this.merchandisesStore.$state.merchandises =
+                    await this.merchandiseService.getAll()
+
+                this.$router.push('/merchandises')
+            }
+             */
+        }
     }
-}
+})
 </script>

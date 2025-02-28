@@ -3,8 +3,8 @@ import httpCLient from '@/util/http-client'
 import { useIdentityStore } from '@/stores/identity'
 import type { AxiosError } from 'axios'
 import type { IServiceResult } from './model/IServiceResult'
-import { ILoginInfo } from '@/dal/domain/ILoginInfo'
-import { IRegisterInfo } from '@/dal/domain/IRegisterInfo'
+import type { ILoginInfo } from '@/dal/domain/ILoginInfo'
+import type { IRegisterInfo } from '@/dal/domain/IRegisterInfo'
 import Logger from '@/util/logger'
 
 /**

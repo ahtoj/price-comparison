@@ -8,46 +8,32 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component'
-import router from '@/router/index'
 import { useIdentityStore } from '@/stores/identity'
 import Logger from '@/util/logger'
+import {defineComponent} from "vue";
 
 /**
  * @author Ahto Jalak
  * @since 06.02.2023
  */
-@Options({
+export default defineComponent( {
     components: {
     },
+    setup() {
+        const logger = new Logger("App")
+        const identityStore = useIdentityStore()
+        const token = ''
+
+        return {
+            logger,
+            identityStore,
+            token,
+        }
+    },
+    methods: {
+    },
 })
-export default class App extends Vue {
-    private logger = new Logger(App.name)
-    private identityStore = useIdentityStore()
-    token = ''
 
-    get isAuthenticated (): boolean {
-        return this.identityStore.getJwt() !== null
-    }
-
-    logoutClicked (): void {
-        this.identityStore.clearJwt()
-        router.push('/')
-    }
-
-    refreshTokenClicked (): void {
-        this.identityStore.refreshUser().then(async value => {
-            if (value) {
-                this.logger.info('token refresh')
-            }
-        })
-        router.push('/')
-    }
-
-    mounted() {
-        this.logger.info("mounted")
-    }
-}
 </script>
 
 <style>

@@ -50,72 +50,75 @@
 <script lang="ts">
 import { CategoryService } from '@/bll/service/CategoryService'
 import { useCategoryStore } from '@/stores/category'
-import { Options, Vue } from 'vue-class-component'
 import { useProductStore } from '@/stores/product'
 import { ProductService } from '@/bll/service/ProductService'
 import { useIdentityStore } from '@/stores/identity'
-import { ICategory } from '@/dal/domain/ICategory'
-import { IProduct } from '@/dal/domain/IProduct'
+import type { ICategory } from '@/dal/domain/ICategory'
+import type { IProduct } from '@/dal/domain/IProduct'
 import Logger from '@/util/logger'
+import {defineComponent} from "vue";
 
 /**
  * @author Ahto Jalak
  * @since 06.02.2023
  */
-@Options({
+export default defineComponent({
     components: {},
     props: {
         id: String
     },
     emits: [],
+    setup(props) {
+        const logger = new Logger("CategoryDetails")
+        const id = props.id
+        const categoriesStore = useCategoryStore()
+        const categoryService = new CategoryService()
+        const productsStore = useProductStore()
+        const productService = new ProductService()
+        const identityStore = useIdentityStore()
+        const form = {
+            filterByMinPrice: 0,
+            filterByMaxPrice: 10000
+        }
+        const categories: ICategory[] = []
+        const products: IProduct[] = []
+        const category: ICategory | null = null
+        const name: string | undefined = ''
+
+        return {
+            logger,
+            id,
+            categoriesStore,
+            categoryService,
+            productsStore,
+            productService,
+            identityStore,
+            form,
+            categories,
+            products,
+            category,
+            name,
+        }
+    },
+    methods: {
+
+        isAuthenticated (): boolean {
+            return this.identityStore.getJwt() !== null
+        },
+
+        isAdmin (): boolean {
+            return this.identityStore.isAdmin()
+        },
+
+        async applyPriceRangeFilter (): Promise<void> {
+            // this.products =
+            //     await this.productService.getAllByCategoryIdAndFilters(this.id, this.form as IFormProductPage)
+        },
+
+        getProductImageByBarcode (id: string) {
+            return `/images/product/${id}.jpg`
+        }
+    }
 })
-export default class CategoryDetails extends Vue {
-    private logger = new Logger(CategoryDetails.name)
-    id!: string
-    categoriesStore = useCategoryStore()
-    categoryService = new CategoryService()
-    productsStore = useProductStore()
-    productService = new ProductService()
-    private identityStore = useIdentityStore()
-    private form = {
-        filterByMinPrice: 0,
-        filterByMaxPrice: 10000
-    }
-
-    get isAuthenticated (): boolean {
-        return this.identityStore.getJwt() !== null
-    }
-
-    get isAdmin (): boolean {
-        return this.identityStore.isAdmin()
-    }
-
-    categories: ICategory[] = []
-    products: IProduct[] = []
-    category: ICategory | null = null
-    name: string | undefined = ''
-
-    async applyPriceRangeFilter (): Promise<void> {
-        // this.products =
-        //     await this.productService.getAllByCategoryIdAndFilters(this.id, this.form as IFormProductPage)
-    }
-
-    async mounted (): Promise<void> {
-        this.logger.info('mounted')
-        // this.category =
-        //     await this.categoryService.get(this.id).then(c => {
-        //         this.name = c.name
-        //         return c
-        //     })
-        // this.categories =
-        //     await this.categoryService.getAllByCategoryId(this.id)
-        // this.products =
-        //     await this.productService.getAllByCategoryId(this.id)
-    }
-
-    getProductImageByBarcode (id: string) {
-        return `/images/product/${id}.jpg`
-    }
-}
 
 </script>

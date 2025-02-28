@@ -1,5 +1,5 @@
-import { IServiceResult } from '@/bll/service/model/IServiceResult'
-import { IPublicStats } from '@/dal/domain/IPublicStats'
+import type { IServiceResult } from '@/bll/service/model/IServiceResult'
+import type { IPublicStats } from '@/dal/domain/IPublicStats'
 
 /**
  * @author Ahto Jalak

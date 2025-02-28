@@ -12,7 +12,7 @@
         </tr>
         </thead>
         <tbody>
-        <tr v-for="item of wishes" :key="item.id">
+        <tr v-for="item of wishService.getAll()" :key="item.id">
             <td>{{ item.id }}</td>
             <td>{{ item.customerId }}</td>
             <td>
@@ -28,30 +28,35 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component'
 import { PriceService } from '@/bll/service/PriceService'
 import { usePriceStore } from '@/stores/price'
 import Logger from '@/util/logger'
+import {defineComponent, onMounted} from "vue";
 
 /**
  * @author Ahto Jalak
  * @since 06.02.2023
  */
-@Options({
+export default defineComponent({
     components: {},
     props: {},
     emits: [],
+    setup() {
+        const logger = new Logger("PriceIndex")
+        const wishesStore = usePriceStore()
+        const wishService = new PriceService()
+
+        onMounted(() => {
+            logger.info('mounted')
+            // this.wishesStore.$state.prices =
+            //     await this.wishService.getAll()
+        })
+
+        return {
+            logger,
+            wishesStore,
+            wishService,
+        }
+    },
 })
-export default class PriceIndex extends Vue {
-    private logger = new Logger(PriceIndex.name)
-    wishesStore = usePriceStore()
-    wishService = new PriceService()
-
-    async mounted (): Promise<void> {
-        this.logger.info('mounted')
-        // this.wishesStore.$state.prices =
-        //     await this.wishService.getAll()
-    }
-}
-
 </script>

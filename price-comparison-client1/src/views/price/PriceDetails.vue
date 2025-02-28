@@ -18,33 +18,42 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component'
 import { usePriceStore } from '@/stores/price'
 import { PriceService } from '@/bll/service/PriceService'
 import Logger from '@/util/logger'
+import {defineComponent, onMounted} from "vue";
 
 /**
  * @author Ahto Jalak
  * @since 06.02.2023
  */
-@Options({
+export default defineComponent({
     components: {},
     props: {
         id: String
     },
     emits: [],
-})
-export default class PriceDetails extends Vue {
-    private logger = new Logger(PriceDetails.name)
-    id!: string
-    wishesStore = usePriceStore()
-    wishService = new PriceService()
+    setup(props) {
+        const logger = new Logger("PriceDetails")
+        const id = props.id
+        const wishesStore = usePriceStore()
+        const wishService = new PriceService()
 
-    async mounted (): Promise<void> {
-        this.logger.info('mounted')
-        // this.wishesStore.$state.price =
-        //     await this.wishService.get(this.id)
+        onMounted(() => {
+            logger.info('mounted')
+            // this.wishesStore.$state.price =
+            //     await this.wishService.get(this.id)
+        })
+
+        return {
+            logger,
+            id,
+            wishesStore,
+            wishService,
+        }
+    },
+    methods: {
+
     }
-}
-
+})
 </script>

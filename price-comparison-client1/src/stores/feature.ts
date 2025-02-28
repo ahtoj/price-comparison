@@ -5,8 +5,7 @@ import { defineStore } from 'pinia'
  * @author Ahto Jalak
  * @since 06.02.2023
  */
-export const useFeatureStore = defineStore({
-    id: 'features',
+export const useFeatureStore = defineStore('features', {
     state: () => ({
         feature: [] as IFeature,
         features: [] as IFeature[],

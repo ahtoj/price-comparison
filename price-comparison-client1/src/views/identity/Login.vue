@@ -1,17 +1,17 @@
 <script lang="ts">
 import { useIdentityStore } from '@/stores/identity'
-import { Options, Vue } from 'vue-class-component'
-import { ILoginInfo } from '@/dal/domain/ILoginInfo'
+import type { ILoginInfo } from '@/dal/domain/ILoginInfo'
 import router from '@/router'
-import { IResponseMessage } from '@/dal/domain/IResponseMessage'
+import type { IResponseMessage } from '@/dal/domain/IResponseMessage'
 import Logger from '@/util/logger'
-import { CredentialResponse } from "vue3-google-signin"
+import type { CredentialResponse } from "vue3-google-signin"
+import {defineComponent} from "vue";
 
 /**
  * @author Ahto Jalak
  * @since 06.02.2023
  */
-@Options({
+export default defineComponent({
     components: {
     },
     data () {
@@ -21,28 +21,64 @@ import { CredentialResponse } from "vue3-google-signin"
     },
     computed: {
     },
-    methods: {
-    },
     props: {},
     emits: [],
-})
-export default class Login extends Vue {
-    private logger = new Logger(Login.name)
-    private identityStore = useIdentityStore()
-    private loginWasOk: boolean | null = null
-    errorMsg: string | null = null
-    email = ''
-    password = ''
+    setup() {
+        const logger = new Logger("Login")
+        const identityStore = useIdentityStore()
+        const loginWasOk: boolean | null = null
+        const errorMsg: string | null = null
+        const email = ''
+        const password = ''
 
-    handleLoginSuccess (response: CredentialResponse): void {
-        console.log("Access Token", response)
-        if (response.credential) {
-            const loginInfo: ILoginInfo = {
-                email: "",
-                password: "",
-                provider: "G",
-                credential: response.credential
+        return {
+            logger,
+            identityStore,
+            loginWasOk,
+            errorMsg,
+            email,
+            password,
+        }
+    },
+    methods: {
+        handleLoginSuccess (response: CredentialResponse): void {
+            console.log("Access Token", response)
+            if (response.credential) {
+                const loginInfo: ILoginInfo = {
+                    email: "",
+                    password: "",
+                    provider: "G",
+                    credential: response.credential
+                }
+                this.identityStore.authenticateUser(loginInfo)
+                    .then((response: IResponseMessage) => {
+                        this.loginWasOk = response.errorMsg == null
+
+                        if (this.loginWasOk) {
+                            router.push('/')
+                        } else {
+                            if (response.errorMsg != null) {
+                                this.errorMsg = response.errorMsg
+                            }
+                        }
+                    })
             }
+        },
+
+        handleLoginError (errorResponse: any): void {
+            if (errorResponse) {
+                console.log("Error: ", errorResponse)
+            }
+        },
+
+        loginClicked (): void {
+            this.logger.info('submitClicked')
+            const loginInfo: ILoginInfo = {
+                    email: this.email,
+                    password: this.password,
+                    provider: "B",
+                    credential: ""
+                }
             this.identityStore.authenticateUser(loginInfo)
                 .then((response: IResponseMessage) => {
                     this.loginWasOk = response.errorMsg == null
@@ -55,70 +91,9 @@ export default class Login extends Vue {
                         }
                     }
                 })
-        }
-    }
-
-    handleLoginError (errorResponse: any): void {
-        if (errorResponse) {
-            console.log("Error: ", errorResponse)
-        }
-    }
-
-    loginClicked (): void {
-        this.logger.info('submitClicked')
-        const loginInfo: ILoginInfo = {
-            email: this.email,
-            password: this.password,
-            provider: "B",
-            credential: ""
-        }
-        this.identityStore.authenticateUser(loginInfo)
-            .then((response: IResponseMessage) => {
-                this.loginWasOk = response.errorMsg == null
-
-                if (this.loginWasOk) {
-                    router.push('/')
-                } else {
-                    if (response.errorMsg != null) {
-                        this.errorMsg = response.errorMsg
-                    }
-                }
-            })
-    }
-
-    // ============ Lifecycle methods ==========
-    beforeCreate (): void {
-        this.logger.info('beforeCreate')
-    }
-
-    created (): void {
-        this.logger.info('created')
-    }
-
-    beforeMount (): void {
-        this.logger.info('beforeMount')
-    }
-
-    mounted (): void {
-        this.logger.info('mounted')
-    }
-
-    beforeUpdate (): void {
-        this.logger.info('beforeUpdate')
-    }
-
-    updated (): void {
-        this.logger.info('updated')
-    }
-
-    beforeDestroy (): void {
-        this.logger.info('beforeDestroy')
-    }
-
-    destroyed (): void {
-        this.logger.info('destroyed')
-    }
-}
+        },
+    },
+})
 </script>
 
 <template>

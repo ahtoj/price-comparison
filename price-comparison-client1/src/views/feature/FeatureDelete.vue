@@ -23,45 +23,54 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component'
 import { FeatureService } from '@/bll/service/FeatureService'
 import { useFeatureStore } from '@/stores/feature'
 import Logger from '@/util/logger'
+import {defineComponent} from "vue";
 
 /**
  * @author Ahto Jalak
  * @since 06.02.2023
  */
-@Options({
+export default defineComponent({
     components: {},
     props: {
         id: String
     },
     emits: [],
-})
-export default class FeatureDelete extends Vue {
-    private logger = new Logger(FeatureDelete.name)
-    id!: string
-    wishesStore = useFeatureStore()
-    wishService = new FeatureService()
+    setup(props:any) {
+        const logger = new Logger("FeatureDelete")
+        const id = props.id
+        const wishesStore = useFeatureStore()
+        const wishService = new FeatureService()
 
-    errorMsg: string | null = null
+        let errorMsg: string | null = null
 
-    async submitClicked (): Promise<void> {
-        this.logger.info('submitClicked')
-
-        // const res = await this.wishService.delete(this.id);
-
-        /*
-        if (res.status >= 300) {
-            this.errorMsg = res.status + ' ' + res.errorMsg
-        } else {
-            this.wishesStore.$state.wishes =
-                await this.wishService.getAll()
-
-            this.$router.push('/wishes')
+        return {
+            logger,
+            id,
+            wishesStore,
+            wishService,
+            errorMsg,
         }
-         */
+    },
+    methods: {
+        async submitClicked (): Promise<void> {
+            this.logger.info('submitClicked')
+
+            // const res = await this.wishService.delete(this.id);
+
+            /*
+            if (res.status >= 300) {
+                this.errorMsg = res.status + ' ' + res.errorMsg
+            } else {
+                this.wishesStore.$state.wishes =
+                    await this.wishService.getAll()
+
+                this.$router.push('/wishes')
+            }
+             */
+        }
     }
-}
+})
 </script>

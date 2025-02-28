@@ -3,14 +3,14 @@
 </template>
 
 <script>
-import { Options, Vue } from 'vue-class-component'
 import { Html5QrcodeScanner } from 'html5-qrcode'
+import {defineComponent, onMounted} from "vue";
 
 /**
  * @author Ahto Jalak
  * @since 15.04.2023
  */
-@Options({
+export default defineComponent({
     components: {},
     methods: {
         onScanSuccess (decodedText, decodedResult) {
@@ -27,17 +27,20 @@ import { Html5QrcodeScanner } from 'html5-qrcode'
             default: 10
         },
     },
-})
-export default class BarcodeScanner extends Vue {
-    mounted () {
-        const config = {
-            fps: this.fps,
-            qrbox: this.qrbox,
+    setup() {
+        onMounted(async () => {
+            const config = {
+                fps: this.fps,
+                qrbox: this.qrbox,
+            }
+            const html5QrcodeScanner = new Html5QrcodeScanner('qr-code-full-region', config)
+            html5QrcodeScanner.render(this.onScanSuccess)
+        })
+
+        return {
         }
-        const html5QrcodeScanner = new Html5QrcodeScanner('qr-code-full-region', config)
-        html5QrcodeScanner.render(this.onScanSuccess)
-    }
-}
+    },
+})
 </script>
 
 <style scoped>

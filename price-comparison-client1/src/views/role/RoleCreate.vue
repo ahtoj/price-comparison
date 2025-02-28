@@ -23,45 +23,46 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component'
 import { CustomerService } from '@/bll/service/CustomerService'
 import { RoleService } from '@/bll/service/RoleService'
 import { useRoleStore } from '@/stores/role'
 import Logger from '@/util/logger'
+import router from "@/router";
+import {defineComponent} from "vue";
 
 /**
  * @author Ahto Jalak
  * @since 06.02.2023
  */
-@Options({
+export default defineComponent({
     components: {},
     props: {},
     emits: [],
-})
-export default class RoleCreate extends Vue {
-    private logger = new Logger(RoleCreate.name)
+    methods: {
+        async submitClicked (): Promise<void> {
+            this.logger.info('submitClicked')
 
-    wishesStore = useRoleStore()
-    wishService = new RoleService()
-    customerService = new CustomerService()
+            const res = await this.wishService.add(
+                {}
+            )
 
-    errorMsg: string | null = null
+            this.logger.info(res.status)
 
-    async submitClicked (): Promise<void> {
-        this.logger.info('submitClicked')
+            await router.push('/wishes')
+        }
+    },
+    setup() {
+        const wishesStore = useRoleStore()
+        const wishService = new RoleService()
+        const customerService = new CustomerService()
+        const logger = new Logger("RoleCreate")
 
-        const res = await this.wishService.add(
-            {}
-        )
-
-        if (res.status == null || res.status >= 300) {
-            this.errorMsg = res.status + ' ' + res.errorMsg
-        } else {
-            // this.wishesStore.$state.wishes =
-            //     await this.wishService.getAll()
-
-            this.$router.push('/wishes')
+        return {
+            wishesStore,
+            wishService,
+            customerService,
+            logger,
         }
     }
-}
+})
 </script>

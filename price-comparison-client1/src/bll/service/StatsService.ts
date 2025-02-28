@@ -1,7 +1,7 @@
-import { IPublicStats } from '@/dal/domain/IPublicStats'
-import { IServiceResult } from '@/bll/service/model/IServiceResult'
+import type { IPublicStats } from '@/dal/domain/IPublicStats'
+import type { IServiceResult } from '@/bll/service/model/IServiceResult'
 import { StatsRepository } from '@/dal/repository/StatsRepository'
-import { IStatsService } from '@/bll/service/model/IStatsService'
+import type { IStatsService } from '@/bll/service/model/IStatsService'
 
 /**
  * @author Ahto Jalak

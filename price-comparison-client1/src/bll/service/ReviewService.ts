@@ -1,5 +1,5 @@
 import { BaseService } from './BaseService'
-import { IReview } from '@/dal/domain/IReview'
+import type { IReview } from '@/dal/domain/IReview'
 
 /**
  * @author Ahto Jalak

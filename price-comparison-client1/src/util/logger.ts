@@ -10,7 +10,7 @@ export default class Logger {
     }
 
     log (message: string, level?: 'info' | 'warn' | 'error') {
-        if (process.env.NODE_ENV !== 'production') {
+        if (import.meta.env.NODE_ENV !== 'production') {
             if (level === 'error') {
                 console.error(this.className + ': ' + message)
             } else if (level === 'warn') {

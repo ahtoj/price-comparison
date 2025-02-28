@@ -32,64 +32,71 @@
 
 <script lang="ts">
 import { OfferService } from '@/bll/service/OfferService'
-import { Options, Vue } from 'vue-class-component'
 import { useIdentityStore } from '@/stores/identity'
-import { IReview } from '@/dal/domain/IReview'
+import type { IReview } from '@/dal/domain/IReview'
 import { useShopStore } from '@/stores/shop'
 import { ShopService } from '@/bll/service/ShopService'
 import Logger from '@/util/logger'
+import {defineComponent, onMounted} from "vue";
 
 /**
  * @author Ahto Jalak
  * @since 31.03.2023
  */
-@Options({
-    components: {},
-    props: {},
-    emits: [],
+export default defineComponent({
+    setup() {
+        const logger = new Logger("ShopIndex")
+        const shopStore = useShopStore()
+        const shopService = new ShopService()
+        const offerService = new OfferService()
+        const identityStore = useIdentityStore()
+        const ratings: IReview[] = []
+
+        onMounted(() => {
+            logger.info('mounted')
+            // const items = await this.shopService.getAll()
+            // this.ratings = items.data as IReview[]
+        })
+
+        return {
+            logger,
+            shopService,
+            shopStore,
+            offerService,
+            identityStore,
+            ratings,
+        }
+    },
+    methods: {
+        isAuthenticated (): boolean {
+            return this.identityStore.getJwt() !== null
+        },
+
+        isAdmin (): boolean {
+            return this.identityStore.isAdmin()
+        },
+
+        clickToProduct (merchandiseId: string): void {
+            this.logger.info(merchandiseId)
+            // this.offerService.get(merchandiseId)
+            //     .then(y => {
+            //         router.push('/products/details/' + y.productId)
+            //     })
+        },
+
+        clickToShopDelete (ratingId: string): void {
+            this.logger.info(ratingId)
+            // this.shopService.delete(ratingId)
+            //     .then(() => {
+            //         this.logger.log('success')
+            //         router.push('/ratings')
+            //     })
+        },
+
+        getProductImageByBarcode (id: string) {
+            return `/images/product/${id}.jpg`
+        }
+    }
 })
-export default class ShopIndex extends Vue {
-    private logger = new Logger(ShopIndex.name)
-    private shopStore = useShopStore()
-    private shopService = new ShopService()
-    private offerService = new OfferService()
-    private identityStore = useIdentityStore()
-    public ratings: IReview[] = []
-
-    get isAuthenticated (): boolean {
-        return this.identityStore.getJwt() !== null
-    }
-
-    get isAdmin (): boolean {
-        return this.identityStore.isAdmin()
-    }
-
-    async mounted (): Promise<void> {
-        this.logger.info('mounted')
-        // const items = await this.shopService.getAll()
-        // this.ratings = items.data as IReview[]
-    }
-
-    clickToProduct (merchandiseId: string): void {
-        this.logger.info(merchandiseId)
-        // this.offerService.get(merchandiseId)
-        //     .then(y => {
-        //         router.push('/products/details/' + y.productId)
-        //     })
-    }
-
-    clickToShopDelete (ratingId: string): void {
-        this.logger.info(ratingId)
-        // this.shopService.delete(ratingId)
-        //     .then(() => {
-        //         this.logger.log('success')
-        //         router.push('/ratings')
-        //     })
-    }
-
-    getProductImageByBarcode (id: string) {
-        return `/images/product/${id}.jpg`
-    }
-}
 
 </script>

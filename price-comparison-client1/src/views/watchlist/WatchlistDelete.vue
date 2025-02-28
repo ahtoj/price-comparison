@@ -23,45 +23,54 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component'
 import { useWatchlistStore } from '@/stores/watchlist'
 import { WatchlistService } from '@/bll/service/WatchlistService'
 import Logger from '@/util/logger'
+import {defineComponent} from "vue";
 
 /**
  * @author Ahto Jalak
  * @since 06.02.2023
  */
-@Options({
+export default defineComponent({
     components: {},
     props: {
         id: String
     },
     emits: [],
-})
-export default class WatchlistDelete extends Vue {
-    private logger = new Logger(WatchlistDelete.name)
-    id!: string
-    watchlistStore = useWatchlistStore()
-    watchlistService = new WatchlistService()
+    setup(props: any) {
+        const logger = new Logger("WatchlistDelete")
+        const id = props.id
+        const watchlistStore = useWatchlistStore()
+        const watchlistService = new WatchlistService()
 
-    errorMsg: string | null = null
+        let errorMsg: string | null = null
 
-    async submitClicked (): Promise<void> {
-        this.logger.info('submitClicked')
-
-        // const res = await this.watchlistService.delete(this.id);
-
-        /*
-        if (res.status >= 300) {
-            this.errorMsg = res.status + ' ' + res.errorMsg
-        } else {
-            this.watchlistStore.$state.watchlists =
-                await this.watchlistService.getAll()
-
-            this.$router.push('/watchlist')
+        return {
+            logger,
+            id,
+            watchlistStore,
+            watchlistService,
+            errorMsg,
         }
-         */
+    },
+    methods: {
+        async submitClicked (): Promise<void> {
+            this.logger.info('submitClicked')
+
+            // const res = await this.watchlistService.delete(this.id);
+
+            /*
+            if (res.status >= 300) {
+                this.errorMsg = res.status + ' ' + res.errorMsg
+            } else {
+                this.watchlistStore.$state.watchlists =
+                    await this.watchlistService.getAll()
+
+                this.$router.push('/watchlist')
+            }
+             */
+        }
     }
-}
+})
 </script>

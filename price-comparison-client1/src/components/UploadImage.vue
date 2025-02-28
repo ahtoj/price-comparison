@@ -54,16 +54,29 @@
     </div>
 </template>
 
-<script>
-import { Options, Vue } from 'vue-class-component'
+<script lang="ts">
 import { OfferService } from '@/bll/service/OfferService'
 import { useOfferStore } from '@/stores/offer'
+import {defineComponent} from "vue";
 
 /**
  * @author Ahto Jalak
  * @since 14.05.2023
  */
-@Options({
+export default defineComponent({
+    setup(props: any) {
+        const offerService = new OfferService()
+        const offerStore = useOfferStore()
+        const barcode = props.barcode
+        const msg = props.msg
+
+        return {
+            offerService,
+            offerStore,
+            barcode,
+            msg,
+        }
+    },
     components: {},
     props: {
         barcode: String,
@@ -125,7 +138,7 @@ import { useOfferStore } from '@/stores/offer'
         },
         stopCameraStream () {
             const tracks = this.$refs.camera.srcObject.getTracks()
-            tracks.forEach((track) => {
+            tracks.forEach((track: any) => {
                 track.stop()
             })
         },
@@ -140,7 +153,7 @@ import { useOfferStore } from '@/stores/offer'
             this.previewImage = ''
             this.stopCameraStream()
         },
-        dataURItoBlob(dataURI) {
+        dataURItoBlob(dataURI : any) {
             // convert base64 to raw binary data held in a string
             // doesn't handle URLEncoded DataURIs - see SO answer #6850276 for code that does this
             const byteString = atob(dataURI.split(',')[1]);
@@ -166,10 +179,6 @@ import { useOfferStore } from '@/stores/offer'
         }
     }
 })
-export default class UploadImage extends Vue {
-    offerService = new OfferService()
-    offerStore = useOfferStore()
-}
 </script>
 
 <style scoped>

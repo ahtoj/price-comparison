@@ -1,10 +1,10 @@
 import { BaseRepository } from '@/dal/repository/BaseRepository'
-import { IServiceResult } from '@/bll/service/model/IServiceResult'
-import { IProductRepository } from '@/dal/repository/model/IProductRepository'
+import type { IServiceResult } from '@/bll/service/model/IServiceResult'
+import type { IProductRepository } from '@/dal/repository/model/IProductRepository'
 import httpCLient from '@/util/http-client'
 import { AxiosError } from 'axios'
-import { IProduct } from '@/dal/domain/IProduct'
-import { IProductImport } from '@/dal/domain/IProductImport'
+import type { IProduct } from '@/dal/domain/IProduct'
+import type { IProductImport } from '@/dal/domain/IProductImport'
 
 /**
  * @author Ahto Jalak
@@ -25,10 +25,10 @@ export class ProductRepository extends BaseRepository<IProduct> implements IProd
                     Authorization: 'Bearer ' + this.identityStore.$state.jwt?.token,
                 }
             })
-        } catch (e) {
+        } catch (e:any) {
             return {
                 status: (e as AxiosError).response?.status,
-                errorMsg: (e as AxiosError).response?.data.message,
+                errorMsg: e.response?.data.message,
             }
         }
 
@@ -48,10 +48,10 @@ export class ProductRepository extends BaseRepository<IProduct> implements IProd
                     Authorization: 'Bearer ' + this.identityStore.$state.jwt?.token,
                 }
             })
-        } catch (e) {
+        } catch (e:any) {
             return {
                 status: (e as AxiosError).response?.status,
-                errorMsg: (e as AxiosError).response?.data.message,
+                errorMsg: e.response?.data.message,
             }
         }
 

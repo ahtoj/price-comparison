@@ -43,72 +43,85 @@
 <script lang="ts">
 import { CategoryService } from '@/bll/service/CategoryService'
 import { ProductService } from '@/bll/service/ProductService'
-import { Options, Vue } from 'vue-class-component'
-import { IProduct } from '@/dal/domain/IProduct'
-import { ICategory } from '@/dal/domain/ICategory'
+import type { IProduct } from '@/dal/domain/IProduct'
+import type { ICategory } from '@/dal/domain/ICategory'
 import Logger from '@/util/logger'
 import router from '@/router'
 import { useCategoryStore } from '@/stores/category'
+import {defineComponent, onMounted} from "vue";
 
 /**
  * @author Ahto Jalak
  * @since 06.02.2023
  */
-@Options({
+export default defineComponent({
+    name: "ProductCreate",
     components: {},
     props: {
         id: Number,
     },
     emits: [],
-})
-export default class ProductCreate extends Vue {
-    private logger = new Logger(ProductCreate.name)
-    private productService = new ProductService()
-    private categoryService = new CategoryService()
-    private categoryStore = useCategoryStore()
+    setup() {
+        const logger = new Logger("ProductCreate")
+        const productService = new ProductService()
+        const categoryService = new CategoryService()
+        const categoryStore = useCategoryStore()
 
-    barcode = ''
-    name = ''
-    description = ''
-    categoryId = 0
-    errorMsg: string | null = null
+        const barcode = ''
+        const name = ''
+        const description = ''
+        const categoryId = 0
+        let errorMsg: string | null = null
 
-    async submitClicked (): Promise<void> {
-        this.logger.info('submitClicked')
-
-        const obj: IProduct = {
-            categoryId: this.categoryId,
-            barcode: this.barcode,
-            name: this.name,
-            description: this.description
-        }
-        this.logger.info(obj as string)
-
-        const res = await this.productService.add(obj)
-
-        if (res.status == null || res.status >= 300) {
-            this.errorMsg = res.status + ' ' + res.errorMsg
-        } else {
-            await router.push('/')
-        }
-    }
-
-    mounted (): void {
-        this.logger.info('mounted')
-
-        this.categoryService.getAllByCategoryId(null).then((items) => {
-            if (items.errorMsg !== undefined) {
-                this.errorMsg = items.errorMsg
-            } else {
-                if (items.data) {
-                    this.categoryStore.$state.categories = items.data
+        onMounted(() => {
+            logger.info('mounted')
+            categoryService.getAllByCategoryId(null).then((items) => {
+                if (items.errorMsg !== undefined) {
+                    errorMsg = items.errorMsg
+                } else {
+                    if (items.data) {
+                        categoryStore.$state.categories = items.data
+                    }
                 }
-            }
+            })
         })
-    }
 
-    getCategoryList (): ICategory[] {
-        return this.categoryStore.$state.categories
+        return {
+            logger,
+            productService,
+            categoryService,
+            categoryStore,
+            barcode,
+            name,
+            description,
+            categoryId,
+            errorMsg,
+
+        }
+    },
+    methods: {
+        async submitClicked (): Promise<void> {
+            this.logger.info('submitClicked')
+
+            const obj: IProduct = {
+                categoryId: this.categoryId,
+                barcode: this.barcode,
+                name: this.name,
+                description: this.description
+            }
+            this.logger.info(obj as string)
+
+            const res = await this.productService.add(obj)
+
+            if (res.status == null || res.status >= 300) {
+                this.errorMsg = res.status + ' ' + res.errorMsg
+            } else {
+                await router.push('/')
+            }
+        },
+        getCategoryList (): ICategory[] {
+            return this.categoryStore.$state.categories
+        },
     }
-}
+})
 </script>

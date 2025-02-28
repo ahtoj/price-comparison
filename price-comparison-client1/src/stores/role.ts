@@ -5,8 +5,7 @@ import { defineStore } from 'pinia'
  * @author Ahto Jalak
  * @since 06.02.2023
  */
-export const useRoleStore = defineStore({
-    id: 'roles',
+export const useRoleStore = defineStore('roles', {
     state: () => ({
         role: {} as IRole,
         roles: [] as IRole[],

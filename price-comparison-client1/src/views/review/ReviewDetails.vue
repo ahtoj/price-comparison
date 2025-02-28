@@ -18,33 +18,34 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component'
 import { ReviewService } from '@/bll/service/ReviewService'
 import { useReviewStore } from '@/stores/review'
 import Logger from '@/util/logger'
+import {defineComponent} from "vue";
 
 /**
  * @author Ahto Jalak
  * @since 06.02.2023
  */
-@Options({
+export default defineComponent({
     components: {},
     props: {
         id: String
     },
     emits: [],
+    setup(props:any) {
+        const logger = new Logger("ReviewDetails")
+        const id = props.id
+        const reviewStore = useReviewStore()
+        const ratingService = new ReviewService()
+
+        return {
+            logger,
+            id,
+            reviewStore,
+            ratingService,
+        }
+    },
+
 })
-export default class ReviewDetails extends Vue {
-    private logger = new Logger(ReviewDetails.name)
-    id!: string
-    reviewStore = useReviewStore()
-    ratingService = new ReviewService()
-
-    async mounted (): Promise<void> {
-        this.logger.info('mounted')
-        // this.reviewStore.$state.review =
-        //     await this.ratingService.get(this.id)
-    }
-}
-
 </script>

@@ -1,5 +1,5 @@
-import { IShop } from '@/dal/domain/IShop'
-import { IPrice } from '@/dal/domain/IPrice'
+import type { IShop } from '@/dal/domain/IShop'
+import type { IPrice } from '@/dal/domain/IPrice'
 
 /**
  * @author Ahto Jalak

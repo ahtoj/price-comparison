@@ -18,33 +18,39 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component'
 import { MetricService } from '@/bll/service/MetricService'
 import { useMetricStore } from '@/stores/metric'
 import Logger from '@/util/logger'
+import {defineComponent, onMounted} from "vue";
 
 /**
  * @author Ahto Jalak
  * @since 06.02.2023
  */
-@Options({
+export default defineComponent({
     components: {},
     props: {
         id: String
     },
     emits: [],
+    setup(props:any) {
+        const logger = new Logger("MetricDetails")
+        const id = props.id
+        const wishesStore = useMetricStore()
+        const wishService = new MetricService()
+
+        onMounted(() => {
+            logger.info('mounted')
+            // this.wishesStore.$state.metric =
+            //     await this.wishService.get(this.id)
+        })
+
+        return {
+            logger,
+            id,
+            wishesStore,
+            wishService,
+        }
+    },
 })
-export default class MetricDetails extends Vue {
-    private logger = new Logger(MetricDetails.name)
-    id!: string
-    wishesStore = useMetricStore()
-    wishService = new MetricService()
-
-    async mounted (): Promise<void> {
-        this.logger.info('mounted')
-        // this.wishesStore.$state.metric =
-        //     await this.wishService.get(this.id)
-    }
-}
-
 </script>

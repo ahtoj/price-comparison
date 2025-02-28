@@ -106,9 +106,8 @@
 
 <script lang="ts">
 import { ProductService } from '@/bll/service/ProductService'
-import { Options, Vue } from 'vue-class-component'
 import Logger from '@/util/logger'
-import { IShop } from '@/dal/domain/IShop'
+import type { IShop } from '@/dal/domain/IShop'
 import { useShopStore } from '@/stores/shop'
 import { ShopService } from '@/bll/service/ShopService'
 import { useIdentityStore } from '@/stores/identity'
@@ -118,11 +117,11 @@ import { IdentityService } from '@/bll/service/IdentityService'
 import Header from '@/components/Header.vue'
 import { WatchlistService } from '@/bll/service/WatchlistService'
 import router from '@/router'
-import { IWatchlist } from '@/dal/domain/IWatchlist'
-import { IOfferResults } from '@/dal/domain/IOfferResults'
-import { IOffer } from '@/dal/domain/IOffer'
+import type { IWatchlist } from '@/dal/domain/IWatchlist'
+import type { IOfferResults } from '@/dal/domain/IOfferResults'
+import type { IOffer } from '@/dal/domain/IOffer'
 import { useWatchlistStore } from '@/stores/watchlist'
-import { IReview } from '@/dal/domain/IReview'
+import type { IReview } from '@/dal/domain/IReview'
 import { useReviewStore } from '@/stores/review'
 import {
     LMap,
@@ -136,13 +135,102 @@ import {
     LPolygon,
     LRectangle,
 } from '@vue-leaflet/vue-leaflet'
-import { IProduct } from '@/dal/domain/IProduct'
+import type { IProduct } from '@/dal/domain/IProduct'
+import {defineComponent, onMounted} from "vue";
 
 /**
  * @author Ahto Jalak
  * @since 15.04.2023
  */
-@Options({
+export default defineComponent({
+    setup(props : any) {
+        const id = props.id
+        const logger = new Logger("ProductDetails")
+        const productService = new ProductService()
+        const offerService = new ProductService()
+        const shopService = new ShopService()
+        const watchlistService = new WatchlistService()
+        const shopStore = useShopStore()
+        const identityStore = useIdentityStore()
+        const productStore = useProductStore()
+        const watchlistStore = useWatchlistStore()
+        const reviewStore = useReviewStore()
+        const identityService = new IdentityService()
+        const distanceUtil = new DistanceUtil()
+
+        const productId = 0
+        let errorMsg: string | null = null
+        const itemDetails: any = []
+
+        onMounted(() => {
+            logger.info('mounted')
+            const distanceUtil = new DistanceUtil()
+
+            productService.getById(id).then((item) => {
+                if (item.errorMsg !== undefined) {
+                    errorMsg = item.errorMsg
+                } else {
+                    if (item.data) {
+                        productStore.$state.product = item.data
+                    }
+                }
+            })
+
+            productService.getOfferListById(id).then((items) => {
+                if (items.errorMsg !== undefined) {
+                    errorMsg = items.errorMsg
+                } else {
+                    if (items.data) {
+                        productStore.$state.offers = items.data
+                    }
+                }
+            })
+
+            shopService.getAll().then((items : any) => {
+                if (items.errorMsg !== undefined) {
+                    errorMsg = items.errorMsg
+                } else {
+                    const uniqueNodes = items.data
+                    if (uniqueNodes) {
+                        for (let i = 0; i < uniqueNodes.length; i++) {
+                            uniqueNodes[i].distance = distanceUtil.calculateDistance(
+                                identityStore.getCoords().latitude ?? 59.436962,
+                                identityStore.getCoords().longitude ?? 24.753574,
+                                uniqueNodes[i].latitude ?? 59.436962,
+                                uniqueNodes[i].longitude ?? 24.753574,
+                                'K'
+                            )
+                        }
+
+                        uniqueNodes.sort(function (a : any, b : any) {
+                            return (a.distance ?? 0) - (b.distance ?? 0)
+                        })
+
+                        shopStore.$state.shops = uniqueNodes
+                    }
+                }
+            })
+        })
+
+        return {
+            id,
+            logger,
+            productService,
+            offerService,
+            shopService,
+            watchlistService,
+            shopStore,
+            identityStore,
+            productStore,
+            watchlistStore,
+            reviewStore,
+            identityService,
+            distanceUtil,
+            productId,
+            errorMsg,
+            itemDetails,
+        }
+    },
     components: {
         Header,
         LMap,
@@ -168,234 +256,164 @@ import { IProduct } from '@/dal/domain/IProduct'
         };
     },
     computed: {
-        iconUrl() {
-            return `https://placekitten.com/${this.iconWidth}/${this.iconHeight}`;
+        iconUrl() : any {
+            return `https://placekitten.com/25/25`;
         },
-        iconSize() {
-            return [this.iconWidth, this.iconHeight];
+        iconSize() : any {
+            return [25, 25];
         },
     },
     methods: {
         log(a: string) {
             console.log(a);
         },
+
+        submitClicked (): void {
+            this.logger.info('submitClicked')
+        },
+
+        getShopList (): IShop[] {
+            return this.shopStore.$state.shops
+        },
+
+        getProduct (): IProduct {
+            return this.productStore.$state.product
+        },
+
+        getOffers (): IOffer[] {
+            return this.productStore.$state.offers
+        },
+
+        getOffersDetails () {
+            const offers = [] as IOfferResults[]
+            const shops = []
+
+            for (let i = 0; i < this.getOffers().length; i++) {
+                const item = this.getOffers()[i] as IOffer
+                if (item.shopId && shops.indexOf(item.shopId) === -1) {
+                    shops.push(item.shopId)
+                    const shop = item.shop as IShop
+                    offers.push({
+                        id: shop.id,
+                        name: shop.name,
+                        latitude: shop.latitude,
+                        longitude: shop.longitude,
+                        url: shop.url,
+                        offers: this.getOffers().filter(o => {
+                            return o.shopId === shop.id
+                        }),
+                    } as IOfferResults)
+                }
+            }
+            this.logger.info(offers.length.toString())
+
+            return offers
+        },
+
+        isAuthenticated (): boolean {
+            return this.identityService.isAuthenticated()
+        },
+
+        setItemDetails (id: number) {
+            const x = this.itemDetails.indexOf(id)
+            if (x === -1) {
+                this.itemDetails.push(id)
+                return true
+            } else {
+                this.itemDetails.splice(this.itemDetails.indexOf(id))
+                return false
+            }
+        },
+
+        showItemDetails (id: number) {
+            return this.itemDetails.indexOf(id) !== -1
+        },
+
+        clickAddReview (id: number) {
+            router.push('/review/create/' + id)
+        },
+
+        addBookmark (id: number) {
+            this.logger.info('addBookmark')
+            if (this.bookmarkIsActive(id)) {
+                this.watchlistService.delete(this.getWatchlistIdFromProductId(id)).then((item) => {
+                    if (item.errorMsg !== undefined) {
+                        this.errorMsg = item.errorMsg
+                    } else {
+                        if (item.data) {
+                            this.logger.info(item.data.toString())
+                            this.watchlistStore.remove(item.data)
+                        }
+                    }
+                })
+            } else {
+                const entity = {
+                    productId: id,
+                } as IWatchlist
+                this.watchlistService.add(entity).then((item) => {
+                    if (item.errorMsg !== undefined) {
+                        this.errorMsg = item.errorMsg
+                    } else {
+                        if (item.data) {
+                            this.watchlistStore.add(item.data)
+                        }
+                    }
+                })
+            }
+        },
+
+        clickAddOffer (id: number) {
+            this.logger.info(id.toString())
+            router.push('/offer/create/' + id)
+        },
+
+        getWatchlistIdFromProductId (id: number): number {
+            this.logger.info('bookmarkIsActive')
+            for (let i = 0; i < this.watchlistStore.watchlistCount; i++) {
+                const x = this.watchlistStore.$state.watchlists[i] as IWatchlist
+                if (id === x.productId) {
+                    return x.id ?? 0
+                }
+            }
+
+            return 0
+        },
+
+        bookmarkIsActive (id: number) {
+            this.logger.info('bookmarkIsActive')
+            for (let i = 0; i < this.watchlistStore.watchlistCount; i++) {
+                const x = this.watchlistStore.$state.watchlists[i] as IWatchlist
+                if (id === x.productId) {
+                    return true
+                }
+            }
+
+            return false
+        },
+
+        reviewIsActive (id: number) {
+            this.logger.info('reviewIsActive')
+            for (let i = 0; i < this.reviewStore.reviewCount; i++) {
+                const x = this.reviewStore.$state.reviews[i] as IReview
+                if (id === x.productId) {
+                    return true
+                }
+            }
+
+            return false
+        },
+
+        getCategoryImageByType (id: string) {
+            return `/images/category/${id}.png`
+        },
+
+        getShopImageByType (url: string) {
+            return `/images/shop/${url}`
+        },
+
+        getProductImageByBarcode (id: string) {
+            return `/images/product/${id}.jpg`
+        }
     },
 })
-export default class ProductDetails extends Vue {
-    id!: number
-
-    private logger = new Logger(ProductDetails.name)
-    private productService = new ProductService()
-    private offerService = new ProductService()
-    private shopService = new ShopService()
-    private watchlistService = new WatchlistService()
-    private shopStore = useShopStore()
-    private identityStore = useIdentityStore()
-    private productStore = useProductStore()
-    private watchlistStore = useWatchlistStore()
-    private reviewStore = useReviewStore()
-    private identityService = new IdentityService()
-    distanceUtil = new DistanceUtil()
-
-    productId = 0
-    errorMsg: string | null = null
-    private itemDetails: any = []
-
-    submitClicked (): void {
-        this.logger.info('submitClicked')
-    }
-
-    mounted (): void {
-        this.logger.info('mounted')
-        const distanceUtil = new DistanceUtil()
-
-        this.productService.getById(this.id).then((item) => {
-            if (item.errorMsg !== undefined) {
-                this.errorMsg = item.errorMsg
-            } else {
-                if (item.data) {
-                    this.productStore.$state.product = item.data
-                }
-            }
-        })
-
-        this.productService.getOfferListById(this.id).then((items) => {
-            if (items.errorMsg !== undefined) {
-                this.errorMsg = items.errorMsg
-            } else {
-                if (items.data) {
-                    this.productStore.$state.offers = items.data
-                }
-            }
-        })
-
-        this.shopService.getAll().then((items) => {
-            if (items.errorMsg !== undefined) {
-                this.errorMsg = items.errorMsg
-            } else {
-                const uniqueNodes = items.data
-                if (uniqueNodes) {
-                    for (let i = 0; i < uniqueNodes.length; i++) {
-                        uniqueNodes[i].distance = distanceUtil.calculateDistance(
-                            this.identityStore.getCoords().latitude ?? 59.436962,
-                            this.identityStore.getCoords().longitude ?? 24.753574,
-                            uniqueNodes[i].latitude ?? 59.436962,
-                            uniqueNodes[i].longitude ?? 24.753574,
-                            'K'
-                        )
-                    }
-
-                    uniqueNodes.sort(function (a, b) {
-                        return (a.distance ?? 0) - (b.distance ?? 0)
-                    })
-
-                    this.shopStore.$state.shops = uniqueNodes
-                }
-            }
-        })
-    }
-
-    getShopList (): IShop[] {
-        return this.shopStore.$state.shops
-    }
-
-    getProduct (): IProduct {
-        return this.productStore.$state.product
-    }
-
-    getOffers (): IOffer[] {
-        return this.productStore.$state.offers
-    }
-
-    getOffersDetails () {
-        const offers = [] as IOfferResults[]
-        const shops = []
-
-        for (let i = 0; i < this.getOffers().length; i++) {
-            const item = this.getOffers()[i] as IOffer
-            if (item.shopId && shops.indexOf(item.shopId) === -1) {
-                shops.push(item.shopId)
-                const shop = item.shop as IShop
-                offers.push({
-                    id: shop.id,
-                    name: shop.name,
-                    latitude: shop.latitude,
-                    longitude: shop.longitude,
-                    url: shop.url,
-                    offers: this.getOffers().filter(o => {
-                        return o.shopId === shop.id
-                    }),
-                } as IOfferResults)
-            }
-        }
-        this.logger.info(offers.length.toString())
-
-        return offers
-    }
-
-    get isAuthenticated (): boolean {
-        return this.identityService.isAuthenticated()
-    }
-
-    setItemDetails (id: number) {
-        const x = this.itemDetails.indexOf(id)
-        if (x === -1) {
-            this.itemDetails.push(id)
-            return true
-        } else {
-            this.itemDetails.splice(this.itemDetails.indexOf(id))
-            return false
-        }
-    }
-
-    showItemDetails (id: number) {
-        return this.itemDetails.indexOf(id) !== -1
-    }
-
-    clickAddReview (id: number) {
-        router.push('/review/create/' + id)
-    }
-
-    addBookmark (id: number) {
-        this.logger.info('addBookmark')
-        if (this.bookmarkIsActive(id)) {
-            this.watchlistService.delete(this.getWatchlistIdFromProductId(id)).then((item) => {
-                if (item.errorMsg !== undefined) {
-                    this.errorMsg = item.errorMsg
-                } else {
-                    if (item.data) {
-                        this.logger.info(item.data.toString())
-                        this.watchlistStore.remove(item.data)
-                    }
-                }
-            })
-        } else {
-            const entity = {
-                productId: id,
-            } as IWatchlist
-            this.watchlistService.add(entity).then((item) => {
-                if (item.errorMsg !== undefined) {
-                    this.errorMsg = item.errorMsg
-                } else {
-                    if (item.data) {
-                        this.watchlistStore.add(item.data)
-                    }
-                }
-            })
-        }
-    }
-
-    clickAddOffer (id: number) {
-        this.logger.info(id.toString())
-        router.push('/offer/create/' + id)
-    }
-
-    getWatchlistIdFromProductId (id: number): number {
-        this.logger.info('bookmarkIsActive')
-        for (let i = 0; i < this.watchlistStore.watchlistCount; i++) {
-            const x = this.watchlistStore.$state.watchlists[i] as IWatchlist
-            if (id === x.productId) {
-                return x.id ?? 0
-            }
-        }
-
-        return 0
-    }
-
-    bookmarkIsActive (id: number) {
-        this.logger.info('bookmarkIsActive')
-        for (let i = 0; i < this.watchlistStore.watchlistCount; i++) {
-            const x = this.watchlistStore.$state.watchlists[i] as IWatchlist
-            if (id === x.productId) {
-                return true
-            }
-        }
-
-        return false
-    }
-
-    reviewIsActive (id: number) {
-        this.logger.info('reviewIsActive')
-        for (let i = 0; i < this.reviewStore.reviewCount; i++) {
-            const x = this.reviewStore.$state.reviews[i] as IReview
-            if (id === x.productId) {
-                return true
-            }
-        }
-
-        return false
-    }
-
-    getCategoryImageByType (id: string) {
-        return `/images/category/${id}.png`
-    }
-
-    getShopImageByType (url: string) {
-        return `/images/shop/${url}`
-    }
-
-    getProductImageByBarcode (id: string) {
-        return `/images/product/${id}.jpg`
-    }
-}
 </script>

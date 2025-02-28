@@ -47,97 +47,112 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component'
 import { useReviewStore } from '@/stores/review'
 import { ReviewService } from '@/bll/service/ReviewService'
 import Logger from '@/util/logger'
 import { IdentityService } from '@/bll/service/IdentityService'
 import Header from '@/components/Header.vue'
 import router from '@/router'
-import { IReview } from '@/dal/domain/IReview'
+import type { IReview } from '@/dal/domain/IReview'
 import { useProductStore } from '@/stores/product'
 import { ProductService } from '@/bll/service/ProductService'
 import Vue3StarRatings from 'vue3-star-ratings'
+import {defineComponent, onMounted} from "vue";
 
 /**
  * @author Ahto Jalak
  * @since 06.02.2023
  */
-@Options({
+export default defineComponent({
     components: {
         Header,
         Vue3StarRatings,
     },
     props: {
         id: Number,
+        required: true,
     },
     emits: [],
-})
-export default class ReviewCreate extends Vue {
-    private logger = new Logger(ReviewCreate.name)
-    id!: number
+    setup(props:any) {
+        const logger = new Logger("ReviewCreate")
+        const id = props.id
 
-    reviewStore = useReviewStore()
-    reviewService = new ReviewService()
-    productStore = useProductStore()
-    productService = new ProductService()
-    private identityService = new IdentityService()
+        const reviewStore = useReviewStore()
+        const reviewService = new ReviewService()
+        const productStore = useProductStore()
+        const productService = new ProductService()
+        const identityService = new IdentityService()
 
-    score: number | undefined = undefined
-    description: string | undefined = undefined
-    errorMsg: string | null = null
+        const score: number | undefined = undefined
+        const description: string | undefined = undefined
+        let errorMsg: string | null = null
 
-    async submitClicked (): Promise<void> {
-        this.logger.info('submitClicked')
+        onMounted(() => {
+            reviewService.get(id).then((item) => {
+                if (item.errorMsg !== undefined) {
+                    reviewStore.$state.review = {}
+                } else {
+                    if (item.data) {
+                        reviewStore.$state.review = item.data
+                    }
+                }
+            })
+            productService.getById(id).then((item) => {
+                if (item.errorMsg !== undefined) {
+                    errorMsg = item.errorMsg
+                } else {
+                    if (item.data) {
+                        productStore.$state.product = item.data
+                    }
+                }
+            })
+        })
 
-        const reviewInfo: IReview = {
-            productId: this.id,
-            score: this.score,
-            description: this.description,
+        return {
+            logger,
+            reviewStore,
+            reviewService,
+            productStore,
+            productService,
+            identityService,
+            score,
+            description,
+            errorMsg,
+
         }
-        this.reviewService.add(reviewInfo).then((item) => {
-            if (item.errorMsg !== undefined) {
-                this.errorMsg = item.errorMsg
-            } else {
-                if (item.data) {
-                    this.reviewStore.add(item.data)
-                }
-                router.push('/review')
+    },
+    methods: {
+        async submitClicked (): Promise<void> {
+            this.logger.info('submitClicked')
+
+            const reviewInfo: IReview = {
+                productId: this.id,
+                score: this.score,
+                description: this.description,
             }
-        })
-    }
-
-    get isAuthenticated (): boolean {
-        return this.identityService.isAuthenticated()
-    }
-
-    mounted () {
-        this.reviewService.get(this.id).then((item) => {
-            if (item.errorMsg !== undefined) {
-                this.reviewStore.$state.review = {}
-            } else {
-                if (item.data) {
-                    this.reviewStore.$state.review = item.data
+            this.reviewService.add(reviewInfo).then((item : any) => {
+                if (item.errorMsg !== undefined) {
+                    this.errorMsg = item.errorMsg
+                } else {
+                    if (item.data) {
+                        this.reviewStore.add(item.data)
+                    }
+                    router.push('/review')
                 }
-            }
-        })
-        this.productService.getById(this.id).then((item) => {
-            if (item.errorMsg !== undefined) {
-                this.errorMsg = item.errorMsg
-            } else {
-                if (item.data) {
-                    this.productStore.$state.product = item.data
-                }
-            }
-        })
-    }
+            })
+        },
 
-    getProduct () {
-        return this.productStore.$state.product
-    }
+        isAuthenticated (): boolean {
+            return this.identityService.isAuthenticated()
+        },
 
-    getReview () {
-        return this.reviewStore.$state.review
+        getProduct ():any {
+            return this.productStore.$state.product
+        },
+
+        getReview () :any {
+            return this.reviewStore.$state.review
+        }
     }
-}
+})
 </script>

@@ -29,7 +29,7 @@
             <div v-for="item of limitArray(5)" :key="item.id" class="border p-2 mb-4">
                 <h3>{{ item.name }}</h3>
                 <div>{{ item.barcode }}</div>
-                <small v-if="isAdmin">
+                <small v-if="isAdmin()">
                     <RouterLink :to="{ name: 'merchandises-details', params: { id: item.id } }">Details</RouterLink>
                     |
                     <RouterLink :to="{ name: 'merchandises-edit', params: { id: item.id } }">Edit</RouterLink>
@@ -43,43 +43,48 @@
 
 <script lang="ts">
 import { OfferService } from '@/bll/service/OfferService'
-import { Options, Vue } from 'vue-class-component'
 import { useIdentityStore } from '@/stores/identity'
 import { useOfferStore } from '@/stores/offer'
 import Logger from '@/util/logger'
+import {defineComponent} from "vue";
 
 /**
  * @author Ahto Jalak
  * @since 06.02.2023
  */
-@Options({
-    components: {},
-    props: {},
-    emits: [],
+export default defineComponent({
+    setup() {
+        const logger = new Logger("OfferIndex")
+        const merchandisesStore = useOfferStore()
+        const merchandiseService = new OfferService()
+        const identityStore = useIdentityStore()
+
+        return {
+            logger,
+            merchandisesStore,
+            merchandiseService,
+            identityStore,
+        }
+    },
+    methods: {
+        isAuthenticated (): boolean {
+            return this.identityStore.getJwt() !== null
+        },
+
+        isAdmin (): boolean {
+            return this.identityStore.isAdmin()
+        },
+
+        limitArray (limit: number) {
+            this.logger.info('limitArray: ' + limit)
+            return this.merchandisesStore.$state.offers
+        },
+
+        async mounted (): Promise<void> {
+            this.logger.info('mounted')
+            // this.merchandisesStore.$state.offers =
+            //     await this.merchandiseService.getAll()
+        }
+    }
 })
-export default class OfferIndex extends Vue {
-    private logger = new Logger(OfferIndex.name)
-    merchandisesStore = useOfferStore()
-    merchandiseService = new OfferService()
-    private identityStore = useIdentityStore()
-
-    get isAuthenticated (): boolean {
-        return this.identityStore.getJwt() !== null
-    }
-
-    get isAdmin (): boolean {
-        return this.identityStore.isAdmin()
-    }
-
-    limitArray () {
-        return this.merchandisesStore.$state.offers
-    }
-
-    async mounted (): Promise<void> {
-        this.logger.info('mounted')
-        // this.merchandisesStore.$state.offers =
-        //     await this.merchandiseService.getAll()
-    }
-}
-
 </script>

@@ -1,5 +1,5 @@
-import { IProduct } from '@/dal/domain/IProduct'
-import { IServiceResult } from '@/bll/service/model/IServiceResult'
+import type { IProduct } from '@/dal/domain/IProduct'
+import type { IServiceResult } from '@/bll/service/model/IServiceResult'
 
 /**
  * @author Ahto Jalak

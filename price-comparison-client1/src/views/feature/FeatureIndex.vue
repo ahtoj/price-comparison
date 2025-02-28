@@ -28,30 +28,36 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component'
 import { useFeatureStore } from '@/stores/feature'
 import { FeatureService } from '@/bll/service/FeatureService'
 import Logger from '@/util/logger'
+import {defineComponent, onMounted} from "vue";
 
 /**
  * @author Ahto Jalak
  * @since 06.02.2023
  */
-@Options({
+export default defineComponent({
     components: {},
     props: {},
     emits: [],
-})
-export default class FeatureIndex extends Vue {
-    private logger = new Logger(FeatureIndex.name)
-    wishesStore = useFeatureStore()
-    wishService = new FeatureService()
+    setup() {
+        const logger = new Logger("FeatureIndex")
+        const wishesStore = useFeatureStore()
+        const wishService = new FeatureService()
 
-    async mounted (): Promise<void> {
-        this.logger.info('mounted')
-        // this.wishesStore.$state.features =
-        //     await this.wishService.getAll()
-    }
-}
+        onMounted(() => {
+            logger.info('mounted')
+            // this.wishesStore.$state.features =
+            //     await this.wishService.getAll()
+        })
+
+        return {
+            logger,
+            wishesStore,
+            wishService,
+        }
+    },
+})
 
 </script>

@@ -1,5 +1,5 @@
 import { BaseService } from './BaseService'
-import { IUser } from '@/dal/domain/IUser'
+import type { IUser } from '@/dal/domain/IUser'
 
 /**
  * @author Ahto Jalak

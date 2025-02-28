@@ -32,86 +32,101 @@
 
 <script lang="ts">
 import { OfferService } from '@/bll/service/OfferService'
-import { Options, Vue } from 'vue-class-component'
 import { useIdentityStore } from '@/stores/identity'
-import { IReview } from '@/dal/domain/IReview'
+import type { IReview } from '@/dal/domain/IReview'
 import router from '@/router'
 import { ReviewService } from '@/bll/service/ReviewService'
 import { useReviewStore } from '@/stores/review'
 import Logger from '@/util/logger'
 import { IdentityService } from '@/bll/service/IdentityService'
 import Header from '@/components/Header.vue'
+import {defineComponent, onMounted} from "vue";
 
 /**
  * @author Ahto Jalak
  * @since 06.02.2023
  */
-@Options({
+export default defineComponent({
     components: {
         Header,
     },
     props: {},
     emits: [],
-})
-export default class ReviewIndex extends Vue {
-    private logger = new Logger(ReviewIndex.name)
-    private reviewStore = useReviewStore()
-    private reviewService = new ReviewService()
-    private merchandiseService = new OfferService()
-    private identityStore = useIdentityStore()
-    public ratings: IReview[] = []
-    private identityService = new IdentityService()
+    setup() {
+        const logger = new Logger("ReviewIndex")
+        const reviewStore = useReviewStore()
+        const reviewService = new ReviewService()
+        const merchandiseService = new OfferService()
+        const identityStore = useIdentityStore()
+        const ratings: IReview[] = []
+        const identityService = new IdentityService()
 
-    errorMsg: string | null = null
+        const errorMsg: string | null = null
 
-    get isAdmin (): boolean {
-        return this.identityStore.isAdmin()
-    }
-
-    async mounted (): Promise<void> {
-        this.logger.info('mounted')
-        const items = await this.reviewService.getAll()
-        this.reviewStore.$state.reviews = items.data as IReview[]
-    }
-
-    clickToProduct (merchandiseId: string): void {
-        this.logger.info(merchandiseId)
-        // this.merchandiseService.get(merchandiseId)
-        //     .then(y => {
-        //         router.push('/review/details/' + y.productId)
-        //     })
-    }
-
-    clickToReviewDelete (ratingId: number): void {
-        this.reviewService.delete(ratingId)
-            .then(() => {
-                router.push('/review')
-            })
-    }
-
-    getReviews(): IReview[] {
-        return this.reviewStore.$state.reviews
-    }
-
-    get isAuthenticated (): boolean {
-        return this.identityService.isAuthenticated()
-    }
-
-    clickRemove (reviewId: number) {
-        this.reviewService.delete(reviewId).then((item) => {
-            if (item.errorMsg !== undefined) {
-                this.errorMsg = item.errorMsg
-            } else {
-                if (item.data) {
-                    this.reviewStore.remove(item.data)
-                }
-            }
+        onMounted(async () => {
+            logger.info('mounted')
+            const items = await reviewService.getAll()
+            reviewStore.$state.reviews = items.data as IReview[]
         })
+
+        return {
+            logger,
+            reviewStore,
+            reviewService,
+            merchandiseService,
+            identityStore,
+            ratings,
+            identityService,
+            errorMsg,
+        }
+    },
+    methods: {
+        isAdmin (): boolean {
+            return this.identityStore.isAdmin()
+        },
+
+        async mounted (): Promise<void> {
+        },
+
+        clickToProduct (merchandiseId: string): void {
+            this.logger.info(merchandiseId)
+            // this.merchandiseService.get(merchandiseId)
+            //     .then(y => {
+            //         router.push('/review/details/' + y.productId)
+            //     })
+        },
+
+        clickToReviewDelete (ratingId: number): void {
+            this.reviewService.delete(ratingId)
+                .then(() => {
+                    router.push('/review')
+                })
+        },
+
+        getReviews(): IReview[] {
+            return this.reviewStore.$state.reviews
+        },
+
+        isAuthenticated (): boolean {
+            return this.identityService.isAuthenticated()
+        },
+
+        clickRemove (reviewId: number) {
+            this.reviewService.delete(reviewId).then((item) => {
+                if (item.errorMsg !== undefined) {
+                    this.errorMsg = item.errorMsg
+                } else {
+                    if (item.data) {
+                        this.reviewStore.remove(item.data)
+                    }
+                }
+            })
+        },
+
+        getProductImageByBarcode (id: string) {
+            return `/images/product/${id}.jpg`
+        }
     }
 
-    getProductImageByBarcode (id: string) {
-        return `/images/product/${id}.jpg`
-    }
-}
-
+})
 </script>

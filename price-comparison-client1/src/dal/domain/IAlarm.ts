@@ -1,4 +1,4 @@
-import { IProduct } from '@/dal/domain/IProduct'
+import type { IProduct } from '@/dal/domain/IProduct'
 
 /**
  * @author Ahto Jalak

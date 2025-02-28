@@ -1,17 +1,16 @@
 import { defineStore } from 'pinia'
-import { IJwtResponse } from '@/dal/domain/IJwtResponse'
-import { ILoginInfo } from '@/dal/domain/ILoginInfo'
+import type { IJwtResponse } from '@/dal/domain/IJwtResponse'
+import type { ILoginInfo } from '@/dal/domain/ILoginInfo'
 import { IdentityService } from '@/bll/service/IdentityService'
-import { IResponseMessage } from '@/dal/domain/IResponseMessage'
-import { IRegisterInfo } from '@/dal/domain/IRegisterInfo'
-import { ICurrentLocation } from '@/dal/domain/ICurrentLocation'
+import type { IResponseMessage } from '@/dal/domain/IResponseMessage'
+import type { IRegisterInfo } from '@/dal/domain/IRegisterInfo'
+import type { ICurrentLocation } from '@/dal/domain/ICurrentLocation'
 
 /**
  * @author Ahto Jalak
  * @since 06.02.2023
  */
-export const useIdentityStore = defineStore({
-    id: 'identity',
+export const useIdentityStore = defineStore('identity', {
     state: () => ({
         jwt: null as IJwtResponse | null,
         currentLocation: {} as ICurrentLocation,
@@ -77,5 +76,8 @@ export const useIdentityStore = defineStore({
         getCoords (): ICurrentLocation {
             return this.currentLocation
         },
+        setUserRole (): void {
+
+        }
     },
 })

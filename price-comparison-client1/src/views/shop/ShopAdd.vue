@@ -75,49 +75,56 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component'
 import { useIdentityStore } from '@/stores/identity'
 import { ProductService } from '@/bll/service/ProductService'
 import { useProductStore } from '@/stores/product'
-import { IShop } from '@/dal/domain/IShop'
+import type { IShop } from '@/dal/domain/IShop'
 import Logger from '@/util/logger'
+import {defineComponent} from "vue";
 
 /**
  * @author Ahto Jalak
  * @since 06.02.2023
  */
-@Options({
+export default defineComponent({
     components: {},
     data () {
         return {}
     },
-    methods: {},
-    props: {}
-})
-export default class ShopAdd extends Vue {
-    private logger = new Logger(ShopAdd.name)
-    private identityStore = useIdentityStore()
-    private productStore = useProductStore()
-    private productService = new ProductService()
-    private shopName = ''
-    private latitude = ''
-    private longitude = ''
+    props: {},
+    setup() {
+        const logger = new Logger("ShopAdd")
+        const identityStore = useIdentityStore()
+        const productStore = useProductStore()
+        const productService = new ProductService()
+        const shopName = ''
+        const latitude = ''
+        const longitude = ''
 
-    shop: IShop | null = null
+        const shop: IShop | null = null
 
-    async addStoreClicked (): Promise<void> {
+        return {
+            logger,
+            identityStore,
+            productStore,
+            productService,
+            shopName,
+            latitude,
+            longitude,
+            shop,
+        }
+    },
+    methods: {
         /*
-        this.shop =
-            await this.productService.addStore({
-                shopName: this.shopName,
-                latitude: this.latitude,
-                longitude: this.longitude
-            } as IShop)
+        async addStoreClicked (): Promise<void> {
+            this.shop =
+                await this.productService.addStore({
+                    shopName: this.shopName,
+                    latitude: this.latitude,
+                    longitude: this.longitude
+                } as IShop)
+        }
         */
     }
-
-    async mounted (): Promise<void> {
-        this.logger.info('mounted')
-    }
-}
+})
 </script>

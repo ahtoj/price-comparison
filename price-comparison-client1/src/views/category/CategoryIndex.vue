@@ -28,48 +28,44 @@
 <script lang="ts">
 import { CategoryService } from '@/bll/service/CategoryService'
 import { useCategoryStore } from '@/stores/category'
-import { Options, Vue } from 'vue-class-component'
 import Logger from '@/util/logger'
+import {defineComponent, onMounted} from "vue";
+import {useIdentityStore} from "@/stores/identity.ts";
+import type {ICategory} from "@/dal/domain/ICategory.ts";
 
 /**
  * @author Ahto Jalak
  * @since 06.02.2023
  */
-@Options({
-    components: {},
-    props: {},
-    emits: [],
-})
-export default class CategoryIndex extends Vue {
-    private logger = new Logger(CategoryIndex.name)
-    categoryStore = useCategoryStore()
-    categoryService = new CategoryService()
-    errorMsg: string | null = null
+export default defineComponent({
+    setup() {
+        const logger = new Logger("CategoryIndex")
+        const categoryStore = useCategoryStore()
+        const categoryService = new CategoryService()
+        const identityStore = useIdentityStore()
+        let errorMsg: string | null = null
+        let categories = {} as ICategory[]
 
-    /*
-    limitArray (length = 3) {
-        if (length === -1) {
-            return this.categoriesStore.$state.categories
-        }
-        if (length > this.categoriesStore.$state.categories.length) {
-            return this.categoriesStore.$state.categories
-        }
-
-        return this.categoriesStore.$state.categories.slice(0, length)
-    }
-    */
-
-    async mounted (): Promise<void> {
-        this.categoryService.getAllByCategoryId(null).then((items) => {
-            if (items.errorMsg !== undefined) {
-                this.errorMsg = items.errorMsg
-            } else {
-                if (items.data) {
-                    this.categoryStore.$state.categories = items.data
+        onMounted(() => {
+            categoryService.getAllByCategoryId(null).then((items) => {
+                if (items.errorMsg !== undefined) {
+                    errorMsg = items.errorMsg
+                } else {
+                    if (items.data) {
+                        categories = items.data
+                    }
                 }
-            }
+            })
         })
-    }
-}
 
+        return {
+            logger,
+            categoryStore,
+            categoryService,
+            errorMsg,
+            identityStore,
+            categories,
+        }
+    }
+})
 </script>

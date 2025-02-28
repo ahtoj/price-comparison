@@ -25,29 +25,37 @@
 <script lang="ts">
 import { AccountService } from '@/bll/service/AccountService'
 import { useAccountStore } from '@/stores/account'
-import { Options, Vue } from 'vue-class-component'
 import { CustomerService } from '@/bll/service/CustomerService'
 import Logger from '@/util/logger'
+import {defineComponent} from "vue";
 
 /**
  * @author Ahto Jalak
  * @since 06.02.2023
  */
-@Options({
+export default defineComponent({
     components: {},
     props: {},
     emits: [],
-})
-export default class AccountCreate extends Vue {
-    private logger = new Logger(AccountCreate.name)
-    accountsStore = useAccountStore()
-    accountService = new AccountService()
-    customerService = new CustomerService()
+    methods: {
+        async submitClicked (): Promise<void> {
+            this.logger.info('submitClicked')
+        },
+    },
+    setup() {
+        const logger = new Logger("AccountCreate")
+        const accountsStore = useAccountStore()
+        const accountService = new AccountService()
+        const customerService = new CustomerService()
+        const errorMsg: string | null = null
 
-    errorMsg: string | null = null
-
-    async submitClicked (): Promise<void> {
-        this.logger.info('submitClicked')
+        return {
+            logger,
+            accountsStore,
+            accountService,
+            customerService,
+            errorMsg,
+        }
     }
-}
+})
 </script>

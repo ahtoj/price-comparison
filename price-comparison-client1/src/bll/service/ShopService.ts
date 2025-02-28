@@ -1,7 +1,7 @@
-import { IShop } from '@/dal/domain/IShop'
+import type { IShop } from '@/dal/domain/IShop'
 import { ShopRepository } from '@/dal/repository/ShopRepository'
-import { IShopService } from '@/bll/service/model/IShopService'
-import { IServiceResult } from '@/bll/service/model/IServiceResult'
+import type { IShopService } from '@/bll/service/model/IShopService'
+import type { IServiceResult } from '@/bll/service/model/IServiceResult'
 
 /**
  * @author Ahto Jalak

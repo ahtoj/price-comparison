@@ -1,9 +1,9 @@
 import { BaseRepository } from '@/dal/repository/BaseRepository'
-import { IServiceResult } from '@/bll/service/model/IServiceResult'
+import type { IServiceResult } from '@/bll/service/model/IServiceResult'
 import httpCLient from '@/util/http-client'
 import { AxiosError } from 'axios'
-import { IPublicStats } from '@/dal/domain/IPublicStats'
-import { IStatsRepository } from '@/dal/repository/model/IStatsRepository'
+import type { IPublicStats } from '@/dal/domain/IPublicStats'
+import type { IStatsRepository } from '@/dal/repository/model/IStatsRepository'
 
 /**
  * @author Ahto Jalak
@@ -22,10 +22,10 @@ export class StatsRepository extends BaseRepository<IPublicStats> implements ISt
                     Authorization: 'Bearer ' + this.identityStore.$state.jwt?.token,
                 }
             })
-        } catch (e) {
+        } catch (e:any) {
             return {
                 status: (e as AxiosError).response?.status,
-                errorMsg: (e as AxiosError).response?.data.message,
+                errorMsg: e.response?.data.message,
             }
         }
 

@@ -23,50 +23,60 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component'
 import router from '@/router'
 import { useReviewStore } from '@/stores/review'
 import { ReviewService } from '@/bll/service/ReviewService'
 import Logger from '@/util/logger'
+import {defineComponent} from "vue";
 
 /**
  * @author Ahto Jalak
  * @since 06.02.2023
  */
-@Options({
+export default defineComponent({
     components: {},
     props: {
         id: Number,
     },
     emits: [],
-})
-export default class ReviewDelete extends Vue {
-    private logger = new Logger(ReviewDelete.name)
-    id!: number
-    ratingsStore = useReviewStore()
-    ratingService = new ReviewService()
+    setup(props : any) {
+        const logger = new Logger("ReviewDelete")
+        const id = props.id
+        const ratingsStore = useReviewStore()
+        const ratingService = new ReviewService()
 
-    errorMsg: string | null = null
+        const errorMsg: string | null = null
 
-    async submitClicked (): Promise<void> {
-        this.logger.info('submitClicked')
-
-        await this.ratingService
-            .delete(this.id)
-            .then(() => {
-                router.push('/ratings')
-            })
-
-        /*
-        if (res.status >= 300) {
-            this.errorMsg = res.status + ' ' + res.errorMsg
-        } else {
-            this.ratingsStore.$state.ratings =
-                await this.ratingService.getAll()
-
-            this.$router.push('/ratings')
+        return {
+            logger,
+            id,
+            ratingsStore,
+            ratingService,
+            errorMsg,
         }
-         */
+    },
+    methods: {
+        async submitClicked (): Promise<void> {
+            this.logger.info('submitClicked')
+
+            await this.ratingService
+                .delete(this.id)
+                .then(() => {
+                    router.push('/ratings')
+                })
+
+            /*
+            if (res.status >= 300) {
+                this.errorMsg = res.status + ' ' + res.errorMsg
+            } else {
+                this.ratingsStore.$state.ratings =
+                    await this.ratingService.getAll()
+
+                this.$router.push('/ratings')
+            }
+             */
+        }
     }
-}
+
+})
 </script>

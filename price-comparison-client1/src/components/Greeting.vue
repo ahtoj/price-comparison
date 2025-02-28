@@ -3,17 +3,21 @@
 </template>
 
 <script>
-import { Options, Vue } from 'vue-class-component'
+import {defineComponent} from "vue";
 
-@Options({
+export default defineComponent({
     components: {},
     props: {
         name: String, // string interface
+    },
+    setup(props) {
+        const hello = 'Greetings, ' + props.name;
+
+        return {
+            hello,
+        }
     }
 })
-export default class Greeting extends Vue {
-    hello = 'Greetings, ' + this.name
-}
 </script>
 
 <style scoped>

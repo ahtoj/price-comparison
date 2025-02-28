@@ -1,8 +1,8 @@
-import { IProduct } from '@/dal/domain/IProduct'
-import { IServiceResult } from '@/bll/service/model/IServiceResult'
+import type { IProduct } from '@/dal/domain/IProduct'
+import type { IServiceResult } from '@/bll/service/model/IServiceResult'
 import { ProductRepository } from '@/dal/repository/ProductRepository'
-import { IProductService } from '@/bll/service/model/IProductService'
-import { IProductImport } from '@/dal/domain/IProductImport'
+import type { IProductService } from '@/bll/service/model/IProductService'
+import type { IProductImport } from '@/dal/domain/IProductImport'
 import { OfferRepository } from '@/dal/repository/OfferRepository'
 
 /**

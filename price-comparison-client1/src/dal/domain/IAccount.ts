@@ -4,5 +4,6 @@
  */
 export interface IAccount {
     id?: number
+    customerId?: number
     status?: string
 }
