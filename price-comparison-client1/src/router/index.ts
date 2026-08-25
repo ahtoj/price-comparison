@@ -98,6 +98,14 @@ const routes: Array<RouteRecordRaw> = [
         name: 'identity-register',
         component: Register,
     },
+    {
+        path: '/identity/register/factory',
+        name: 'identity-register-factory',
+        component: Register,
+        props: {
+            variant: 'factory'
+        },
+    },
 
     {
         path: '/account',

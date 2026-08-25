@@ -6,6 +6,7 @@ import { IResponseMessage } from '@/dal/domain/IResponseMessage'
 import { IRegisterInfo } from '@/dal/domain/IRegisterInfo'
 import Logger from '@/util/logger'
 import { CredentialResponse } from "vue3-google-signin"
+import appConfig from '@/util/app-config'
 
 /**
  * @author Ahto Jalak
@@ -13,9 +14,14 @@ import { CredentialResponse } from "vue3-google-signin"
  */
 @Options({
     components: {},
+    props: {
+        variant: {
+            type: String,
+            default: 'user'
+        }
+    },
     methods: {
     },
-    props: {},
     emits: [],
 })
 export default class Register extends Vue {
@@ -30,6 +36,25 @@ export default class Register extends Vue {
     password = ''
     passwordRepeat = ''
     consent = false
+    variant!: string
+    googleAuthEnabled = appConfig.isGoogleAuthEnabled
+    googleButtonComponent = appConfig.isGoogleAuthEnabled ? 'GoogleSignInButton' : null
+
+    get isFactoryVariant (): boolean {
+        return this.variant === 'factory'
+    }
+
+    get registerTitle (): string {
+        return this.isFactoryVariant ? 'Registreeri tehas' : 'Registreeri'
+    }
+
+    get switchRouteName (): string {
+        return this.isFactoryVariant ? 'identity-register' : 'identity-register-factory'
+    }
+
+    get switchRouteLabel (): string {
+        return this.isFactoryVariant ? 'Soovid tavakasutaja kontot?' : 'Soovid tehase kontot?'
+    }
 
     handleLoginSuccess (response: CredentialResponse): void {
         console.log("Access Token", response)
@@ -95,7 +120,12 @@ export default class Register extends Vue {
         <i class="bi bi-backspace"></i>
     </RouterLink>
 
-    <h2>Registreeri</h2>
+    <h2>{{ registerTitle }}</h2>
+    <div class="mb-3">
+        <RouterLink :to="{ name: switchRouteName }">
+            {{ switchRouteLabel }}
+        </RouterLink>
+    </div>
     <div className="row">
         <div className="col-md-12">
 
@@ -132,17 +162,18 @@ export default class Register extends Vue {
                 </div>
             </div>
             <div class="row">
-                <div className="col-6">
+                <div :class="googleAuthEnabled ? 'col-6' : 'col-12'">
                     <button @click="registerClicked()" class="btn btn-primary w-100">
                         Registreeri
                     </button>
                 </div>
-                <div class="col-6">
-                     <GoogleSignInButton
+                <div v-if="googleAuthEnabled" class="col-6">
+                     <component
+                        :is="googleButtonComponent"
                         @success="handleLoginSuccess"
                         @error="handleLoginError"
                         text="continue_with"
-                    ></GoogleSignInButton>
+                    />
                 </div>
             </div>
         </div>

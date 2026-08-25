@@ -6,6 +6,7 @@ import router from '@/router'
 import { IResponseMessage } from '@/dal/domain/IResponseMessage'
 import Logger from '@/util/logger'
 import { CredentialResponse } from "vue3-google-signin"
+import appConfig from '@/util/app-config'
 
 /**
  * @author Ahto Jalak
@@ -33,6 +34,8 @@ export default class Login extends Vue {
     errorMsg: string | null = null
     email = ''
     password = ''
+    googleAuthEnabled = appConfig.isGoogleAuthEnabled
+    googleButtonComponent = appConfig.isGoogleAuthEnabled ? 'GoogleSignInButton' : null
 
     handleLoginSuccess (response: CredentialResponse): void {
         console.log("Access Token", response)
@@ -143,17 +146,18 @@ export default class Login extends Vue {
                 <input v-model="password" className="form-control" type="password"/>
             </div>
             <div class="row">
-                <div class="col-6">
+                <div :class="googleAuthEnabled ? 'col-6' : 'col-12'">
                     <button @click="loginClicked" class="btn btn-primary w-100">
                         Logi sisse
                     </button>
                 </div>
-                <div class="col-6">
-                    <GoogleSignInButton
+                <div v-if="googleAuthEnabled" class="col-6">
+                    <component
+                        :is="googleButtonComponent"
                         @success="handleLoginSuccess"
                         @error="handleLoginError"
                         class="w-100"
-                    ></GoogleSignInButton>
+                    />
                 </div>
             </div>
         </div>
