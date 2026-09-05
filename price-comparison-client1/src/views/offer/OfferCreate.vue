@@ -74,7 +74,7 @@ export default class OfferCreate extends Vue {
     onScan (decodedText: string, decodedResult: unknown): void {
         this.logger.info('onscannn')
         this.barcode = decodedText
-        this.logger.info(decodedResult)
+        this.logger.info(JSON.stringify(decodedResult))
         this.showScanner = false
     }
 
