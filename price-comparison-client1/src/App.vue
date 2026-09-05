@@ -36,7 +36,7 @@ export default class App extends Vue {
     }
 
     refreshTokenClicked (): void {
-        this.identityStore.refreshUser().then(async value => {
+        this.identityStore.refreshUser().then((value: boolean) => {
             if (value) {
                 this.logger.info('token refresh')
             }
@@ -44,8 +44,8 @@ export default class App extends Vue {
         router.push('/')
     }
 
-    mounted() {
-        this.logger.info("mounted")
+    mounted (): void {
+        this.logger.info('mounted')
     }
 }
 </script>

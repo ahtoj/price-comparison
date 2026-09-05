@@ -22,6 +22,14 @@ VUE_APP_GOOGLE_CLIENT_ID=
 npm run serve
 ```
 
+### Run the mock API locally
+```
+npm run mock:api
+npm run serve:mock
+```
+
+If you prefer, you can also keep using `npm run serve` and set `VUE_APP_API_BASE_URL=http://localhost:3001`.
+
 ### Compiles and minifies for production + deploy to S3
 ```
 npm run build

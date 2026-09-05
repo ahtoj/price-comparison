@@ -19,7 +19,7 @@ export const useReviewStore = defineStore({
             this.reviews.push(review)
         },
         remove (reviewId: number) {
-            this.reviews = this.reviews.filter((item) => {
+            this.reviews = this.reviews.filter((item: IReview) => {
                 return item.id !== reviewId
             })
         },

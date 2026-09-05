@@ -97,16 +97,6 @@ import Logger from '@/util/logger'
  */
 @Options({
     components: {},
-    data () {
-        return {
-            result: null
-        }
-    },
-    methods: {
-        onDecode (result: any) {
-            this.result = result
-        }
-    },
     props: {
         id: String,
         username: String,
@@ -115,6 +105,7 @@ import Logger from '@/util/logger'
 })
 export default class AboutView extends Vue {
     private logger = new Logger(AboutView.name)
+    result: string | null = null
     form = {
         name: '',
         email: '',
@@ -125,6 +116,10 @@ export default class AboutView extends Vue {
         satisfaction: '5',
         interested: [],
         terms: false
+    }
+
+    onDecode (result: string): void {
+        this.result = result
     }
 
     async submitForm () {

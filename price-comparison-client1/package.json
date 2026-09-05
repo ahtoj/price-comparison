@@ -4,7 +4,9 @@
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve --port 3000",
+    "serve:mock": "VUE_APP_USE_MOCK_API=true vue-cli-service serve --port 3000",
     "build": "vue-cli-service build",
+    "mock:api": "node mock-api/server.js",
     "test:unit": "vue-cli-service test:unit",
     "lint": "vue-cli-service lint"
   },
@@ -35,7 +37,7 @@
     "@types/bootstrap": "^5.1.11",
     "@types/jest": "^27.0.1",
     "@types/jquery": "^3.5.14",
-    "@types/node": "^16.11.7",
+    "@types/node": "16.11.7",
     "@types/papaparse": "^5.3.2",
     "@typescript-eslint/eslint-plugin": "^5.4.0",
     "@typescript-eslint/parser": "^5.4.0",

@@ -19,7 +19,7 @@ export const useWatchlistStore = defineStore({
             this.watchlists.push(watchlist)
         },
         remove (watchlistId: number) {
-            this.watchlists = this.watchlists.filter((item) => {
+            this.watchlists = this.watchlists.filter((item: IWatchlist) => {
                 return item.id !== watchlistId
             })
         },
