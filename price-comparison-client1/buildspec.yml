@@ -9,7 +9,7 @@ phases:
     commands:
       - if [ -d price-comparison-client1 ]; then cd price-comparison-client1/; fi
       - npm run build
-      - aws s3 sync ./dist s3://s3-eu-west-1.amazonaws.com/price-comparison-web
+      - aws s3 sync ./dist "s3://${S3_BUCKET_NAME}" --delete
 artifacts:
   files:
     - 'price-comparison-client1/dist/**/*'

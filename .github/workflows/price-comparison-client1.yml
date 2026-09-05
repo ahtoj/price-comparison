@@ -7,7 +7,7 @@
 # To get a newer version, you will need to update the SHA.
 # You can also reference a tag or branch, but the action may change without warning.
 
-name: Deploy client application to Amazon ECS
+name: Deploy client application to Amazon S3
 
 on:
   push:
@@ -50,6 +50,9 @@ jobs:
 
       - name: Run build
         working-directory: ${{ env.WORK_DIR }}
+        env:
+          VUE_APP_API_BASE_URL: ${{ secrets.VUE_APP_API_BASE_URL }}
+          VUE_APP_GOOGLE_CLIENT_ID: ${{ secrets.VUE_APP_GOOGLE_CLIENT_ID }}
         run: npm run build
 
       - name: Deploying application to Amazon S3

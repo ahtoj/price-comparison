@@ -160,26 +160,6 @@ import { IProduct } from '@/dal/domain/IProduct'
         id: Number,
     },
     emits: [],
-    data() {
-        return {
-            zoom: 10,
-            iconWidth: 25,
-            iconHeight: 40,
-        };
-    },
-    computed: {
-        iconUrl() {
-            return `https://placekitten.com/${this.iconWidth}/${this.iconHeight}`;
-        },
-        iconSize() {
-            return [this.iconWidth, this.iconHeight];
-        },
-    },
-    methods: {
-        log(a: string) {
-            console.log(a);
-        },
-    },
 })
 export default class ProductDetails extends Vue {
     id!: number
@@ -197,9 +177,24 @@ export default class ProductDetails extends Vue {
     private identityService = new IdentityService()
     distanceUtil = new DistanceUtil()
 
+    zoom = 10
+    iconWidth = 25
+    iconHeight = 40
     productId = 0
     errorMsg: string | null = null
     private itemDetails: any = []
+
+    get iconUrl (): string {
+        return `https://placekitten.com/${this.iconWidth}/${this.iconHeight}`
+    }
+
+    get iconSize (): number[] {
+        return [this.iconWidth, this.iconHeight]
+    }
+
+    log (message: string): void {
+        console.log(message)
+    }
 
     submitClicked (): void {
         this.logger.info('submitClicked')

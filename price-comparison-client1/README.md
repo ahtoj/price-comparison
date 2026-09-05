@@ -10,19 +10,32 @@ nvm use 18
 npm install
 ```
 
-Edit host in src/http-client.ts
+Copy `.env.example` to `.env.local` or `.env.production` and update:
+
+```text
+VUE_APP_API_BASE_URL=
+VUE_APP_GOOGLE_CLIENT_ID=
+```
 
 ### Compiles and hot-reloads for development
 ```
 npm run serve
 ```
 
-### Compiles and minifies for production + deploy to s3
+### Run the mock API locally
+```
+npm run mock:api
+npm run serve:mock
+```
+
+If you prefer, you can also keep using `npm run serve` and set `VUE_APP_API_BASE_URL=http://localhost:3001`.
+
+### Compiles and minifies for production + deploy to S3
 ```
 npm run build
 
 cd dist/
-aws s3 async ./ s3://my-bucket
+aws s3 sync ./ s3://my-bucket --delete
 ```
 
 ### Run production version locally

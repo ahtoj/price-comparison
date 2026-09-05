@@ -4,6 +4,7 @@ import GoogleSignInPlugin from 'vue3-google-signin'
 
 import App from './App.vue'
 import router from './router'
+import appConfig from './util/app-config'
 
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-icons/font/bootstrap-icons.css'
@@ -21,9 +22,9 @@ import 'leaflet/dist/images/marker-shadow.png'
 
 const app = createApp(App)
 
-if (process.env.NODE_ENV === 'production') {
+if (appConfig.isGoogleAuthEnabled) {
     app.use(GoogleSignInPlugin, {
-        clientId: process.env.GOOGLE_CLIENT_ID
+        clientId: appConfig.googleClientId
     })
 }
 

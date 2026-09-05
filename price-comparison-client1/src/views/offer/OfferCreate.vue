@@ -42,14 +42,6 @@ import BarcodeScanner from '@/components/BarcodeScanner.vue'
             progress: 0,
         }
     },
-    methods: {
-        onScan (decodedText: any, decodedResult: any) {
-            this.logger.info('onscannn')
-            this.barcode = decodedText
-            this.logger.info(decodedResult)
-            this.showScanner = false
-        },
-    },
 })
 export default class OfferCreate extends Vue {
     private logger = new Logger(OfferCreate.name)
@@ -78,6 +70,13 @@ export default class OfferCreate extends Vue {
     barcode: string | undefined = undefined
     productImage: string | undefined = undefined
     id!: number
+
+    onScan (decodedText: string, decodedResult: unknown): void {
+        this.logger.info('onscannn')
+        this.barcode = decodedText
+        this.logger.info(JSON.stringify(decodedResult))
+        this.showScanner = false
+    }
 
     async submitClicked (): Promise<void> {
         this.logger.info('submitClicked')

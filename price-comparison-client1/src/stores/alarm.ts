@@ -8,7 +8,7 @@ import { IAlarm } from '@/dal/domain/IAlarm'
 export const useAlarmStore = defineStore({
     id: 'alarms',
     state: () => ({
-        alarm: [] as IAlarm,
+        alarm: {} as IAlarm,
         alarms: [] as IAlarm[],
     }),
     getters: {
@@ -19,7 +19,7 @@ export const useAlarmStore = defineStore({
             this.alarms.push(alarm)
         },
         remove (alarmId: number) {
-            this.alarms = this.alarms.filter((item) => {
+            this.alarms = this.alarms.filter((item: IAlarm) => {
                 return item.id !== alarmId
             })
         },
