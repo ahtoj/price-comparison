@@ -1,12 +1,12 @@
 {
   "name": "price-comparison-client1",
-  "version": "0.2.0",
+  "version": "1.0.0",
   "private": true,
   "engines": {
     "node": ">=24"
   },
   "scripts": {
-    "serve": "node --watch-path=.env node_modules/@vue/cli-service/bin/vue-cli-service.js serve --port 3000",
+    "serve": "vue-cli-service serve --port 3000",
     "build": "vue-cli-service build",
     "test:unit": "vue-cli-service test:unit",
     "lint": "vue-cli-service lint"
