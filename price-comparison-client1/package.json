@@ -1,9 +1,12 @@
 {
   "name": "price-comparison-client1",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
+  "engines": {
+    "node": ">=24"
+  },
   "scripts": {
-    "serve": "vue-cli-service serve --port 3000",
+    "serve": "node --watch-path=.env node_modules/@vue/cli-service/bin/vue-cli-service.js serve --port 3000",
     "build": "vue-cli-service build",
     "test:unit": "vue-cli-service test:unit",
     "lint": "vue-cli-service lint"
@@ -33,7 +36,6 @@
   },
   "devDependencies": {
     "@types/bootstrap": "^5.1.11",
-    "@types/jest": "^27.0.1",
     "@types/jquery": "^3.5.14",
     "@types/papaparse": "^5.3.2",
     "@typescript-eslint/eslint-plugin": "^5.4.0",
@@ -42,23 +44,18 @@
     "@vue/cli-plugin-eslint": "~5.0.0",
     "@vue/cli-plugin-router": "~5.0.0",
     "@vue/cli-plugin-typescript": "~5.0.0",
-    "@vue/cli-plugin-unit-jest": "~5.0.0",
     "@vue/cli-service": "~5.0.0",
     "@vue/eslint-config-standard": "^7.0.0",
     "@vue/eslint-config-typescript": "^9.1.0",
     "@vue/test-utils": "^2.0.0-0",
-    "@vue/vue3-jest": "^27.0.0-alpha.1",
-    "babel-jest": "^27.0.6",
     "eslint": "^8.0.1",
     "eslint-plugin-import": "^2.25.3",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^6.1.1",
     "eslint-plugin-vue": "^8.0.3",
-    "jest": "^27.0.5",
-    "node-sass": "^8.0.0",
+    "sass": "^1.77.0",
     "sass-loader": "^13.2.0",
-    "ts-jest": "^27.0.4",
-    "typescript": "~4.5.5",
+    "typescript": "~5.4.5",
     "vue-browser-geolocation": "^1.8.0"
   },
   "eslintConfig": {

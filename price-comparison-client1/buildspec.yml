@@ -2,6 +2,8 @@ version: 0.2
 
 phases:
   install:
+    runtime-versions:
+      nodejs: 24
     commands:
       - if [ -d price-comparison-client1 ]; then cd price-comparison-client1/; fi
       - npm install

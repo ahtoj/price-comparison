@@ -1,22 +1,16 @@
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-
-# GitHub recommends pinning actions to a commit SHA.
-# To get a newer version, you will need to update the SHA.
-# You can also reference a tag or branch, but the action may change without warning.
-
-name: Deploy client application to Amazon ECS
+name: Deploy client application to Amazon S3
 
 on:
   push:
     branches:
       - main
+    paths:
+      - "price-comparison-client1/**"
+      - ".github/workflows/price-comparison-client1.yml"
+  workflow_dispatch:
 
 env:
   WORK_DIR: price-comparison-client1
-  AWS_REGION: eu-west-1
   DIST_LOCATION_CODE: ./dist
 
 jobs:
@@ -27,22 +21,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
-
-      - uses: dorny/paths-filter@v2
-        id: changes
-        with:
-          filters: |
-            src:
-              - "${{ env.WORK_DIR }}/**"
-
-      - name: Early exit
-        if: steps.changes.outputs.src != 'true'
-        run: |
-          gh run cancel ${{ github.run_id }}
-          gh run watch ${{ github.run_id }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: actions/checkout@v4
 
       - name: Run install
         working-directory: ${{ env.WORK_DIR }}
@@ -55,10 +34,18 @@ jobs:
       - name: Deploying application to Amazon S3
         uses: dvelasquez/deploy-s3-action@main
         with:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_ACCESS_KEY_ID: ${{ vars.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
-          AWS_BUCKET_NAME: ${{ secrets.AWS_BUCKET_NAME }}
+          AWS_DEFAULT_REGION: ${{ vars.AWS_REGION }}
+          AWS_BUCKET_NAME: ${{ vars.AWS_BUCKET_NAME }}
           # BUCKET_PATH: "/pr/${{github.event.number}}"
           BUCKET_PATH: ""
-          DIST_LOCATION_CODE: ./dist
+          DIST_LOCATION_CODE: ${{ env.DIST_LOCATION_CODE }}
+
+      - name: Invalidate CloudFront cache
+        uses: chetan/invalidate-cloudfront-action@v1.0.0
+        with:
+          distribution-id: ${{ vars.CLOUDFRONT_DISTRIBUTION_ID }}
+          paths: "/*"
+          aws-access-key-id: ${{ vars.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}

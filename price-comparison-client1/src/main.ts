@@ -21,7 +21,7 @@ import 'leaflet/dist/images/marker-shadow.png'
 
 const app = createApp(App)
 
-if (process.env.NODE_ENV === 'production') {
+if (process.env.NODE_ENV === 'production' && process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_ID !== '') {
     app.use(GoogleSignInPlugin, {
         clientId: process.env.GOOGLE_CLIENT_ID
     })
