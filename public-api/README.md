@@ -1,24 +1,26 @@
 # price comparison public api
 
-Research project website: https://shopleech.com/
-
-## Project setup
-
 #### requirements
 
 ```text
-openjdk version "17.0.5" 2022-10-18 LTS
-node v15.14.0
-Gradle 7.6
+openjdk 17.x LTS
+node >= 24.x LTS
+Gradle >= 7.x
 ```
 
-#### add configuration to application.properties
+#### add environment variables  (or create .env file)
 
-```properties
-spring.datasource.url=jdbc:postgresql://localhost:5432/jpa_demo
-spring.datasource.username=
-spring.datasource.password=
-spring.datasource.hikari.schema=public
+```
+DB_URL=jdbc:postgresql://localhost:5432/jpa_demo
+DB_USERNAME=
+DB_PASSWORD=
+DB_SCHEMA=public
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+AWS_REGION=eu-west-1
+AWS_BUCKET_NAME=price-comparison-images
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
 ```
 
 #### update flyway configuration in to gradle
@@ -42,13 +44,13 @@ flyway {
 ### Compiles and run for development
 
 ```bash
-java -jar build/libs/public-api-1.0.jar com.shopleech.publicapi.PublicapiApplication
+./run.sh
+# on Windows: .\run.bat
 ```
 
 ### Compiles and minifies for production
 
 ```bash
-./gradlew build
 ./gradlew bootJar
 ```
 

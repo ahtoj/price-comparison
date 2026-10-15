@@ -31,3 +31,4 @@ typings/
 
 # Other
 /platforms/android/key.jks
+/.env

@@ -1,154 +1,123 @@
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-
-# GitHub recommends pinning actions to a commit SHA.
-# To get a newer version, you will need to update the SHA.
-# You can also reference a tag or branch, but the action may change without warning.
-
-name: Deploy backend application to Amazon ECS
+name: Deploy backend application to docker
 
 on:
   push:
     branches:
       - main
+    paths:
+      - "public-api/**"
+      - ".github/workflows/public-api.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: public-api-deploy
+  cancel-in-progress: false
 
 env:
   WORK_DIR: public-api
-  AWS_REGION: eu-west-1
   ECR_REPOSITORY: sl-public-api
-  ECS_SERVICE: sl-ecs-dev_public-api-service
-  ECS_CLUSTER: sl-ecs-dev
-  ECS_TASK_DEFINITION: sl-ecs-dev_public-api
-  CONTAINER_NAME: sl-ecs-dev_task_container2
+  LAMBDA_FUNCTION: sl-public-api
 
 jobs:
   deploy:
-    name: Deploy
+    name: Build and deploy
     runs-on: ubuntu-latest
     environment: production
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - uses: dorny/paths-filter@v2
-        id: changes
-        with:
-          filters: |
-            src:
-              - "${{ env.WORK_DIR }}/**"
-
-      - name: Early exit
-        if: steps.changes.outputs.src != 'true'
-        run: |
-          gh run cancel ${{ github.run_id }}
-          gh run watch ${{ github.run_id }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - uses: actions/setup-java@v3
+      - uses: actions/setup-java@v4
         with:
           distribution: corretto
           java-version: 17
 
       - name: Setup Gradle
-        uses: gradle/gradle-build-action@v2
-        with:
-          gradle-version: 7.4
+        uses: gradle/actions/setup-gradle@v3
 
-      - name: Write value to Properties-file
-        uses: christian-draeger/write-properties@1.0.1
-        with:
-          path: "${{ env.WORK_DIR }}/src/main/resources/application.properties"
-          property: 'spring.datasource.url'
-          value: ${{ secrets.DB_URL }}
-
-      - name: Write value to Properties-file
-        uses: christian-draeger/write-properties@1.0.1
-        with:
-          path: "${{ env.WORK_DIR }}/src/main/resources/application.properties"
-          property: 'spring.datasource.username'
-          value: ${{ secrets.DB_USERNAME }}
-
-      - name: Write value to Properties-file
-        uses: christian-draeger/write-properties@1.0.1
-        with:
-          path: "${{ env.WORK_DIR }}/src/main/resources/application.properties"
-          property: 'spring.datasource.password'
-          value: ${{ secrets.DB_PASSWORD }}
-
-      - name: Write value to Properties-file
-        uses: christian-draeger/write-properties@1.0.1
-        with:
-          path: "${{ env.WORK_DIR }}/src/main/resources/application.properties"
-          property: 'spring.datasource.hikari.schema'
-          value: ${{ secrets.DB_SCHEMA }}
-
-      - name: Write value to Properties-file
-        uses: christian-draeger/write-properties@1.0.1
-        with:
-          path: "${{ env.WORK_DIR }}/src/main/resources/application.properties"
-          property: 'aws.access-key'
-          value: ${{ secrets.AWS_ACCESS_KEY_ID }}
-
-      - name: Write value to Properties-file
-        uses: christian-draeger/write-properties@1.0.1
-        with:
-          path: "${{ env.WORK_DIR }}/src/main/resources/application.properties"
-          property: 'aws.access-secret-key'
-          value: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
-      - name: Run build with Gradle Wrapper
+      - name: Run tests
         working-directory: ${{ env.WORK_DIR }}
-        run: ./gradlew build
+        run: ./gradlew test --no-daemon
 
-      - name: Run build with Gradle Wrapper
-        working-directory: ${{ env.WORK_DIR }}
-        run: ./gradlew bootJar
+      - name: Resolve image version
+        id: version
+        run: |
+          VERSION=$(sed -nE "s/^version = '([^']+)'.*/\1/p" ${{ env.WORK_DIR }}/build.gradle)
+          echo "tag=v${VERSION}-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-access-key-id: ${{ vars.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
+          aws-region: ${{ vars.AWS_REGION }}
 
       - name: Login to Amazon ECR
         id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
+        uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Build, tag, and push image to Amazon ECR
+      - name: Build and push image to Amazon ECR
         id: build-image
+        working-directory: ${{ env.WORK_DIR }}
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          IMAGE_TAG: ${{ github.sha }}
-        working-directory: ${{ env.WORK_DIR }}
+          IMAGE_TAG: ${{ steps.version.outputs.tag }}
         run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+          IMAGE="$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+          docker build --provenance=false -t "$IMAGE" .
+          docker push "$IMAGE"
+          echo "image=$IMAGE" >> "$GITHUB_OUTPUT"
 
-      - name: Download task definition
-        working-directory: ${{ env.WORK_DIR }}
+      - name: Trigger on-prem Docker Swarm deploy
         env:
-          TASK_DEF: ${{ env.ECS_TASK_DEFINITION }}
+          WEBHOOK_URL: ${{ vars.SWARM_WEBHOOK_URL }}
+          WEBHOOK_TOKEN: ${{ secrets.SWARM_WEBHOOK_TOKEN }}
+          IMAGE: ${{ steps.build-image.outputs.image }}
+          IMAGE_TAG: ${{ steps.version.outputs.tag }}
         run: |
-          aws ecs describe-task-definition --task-definition $TASK_DEF --query taskDefinition > task-definition.json
+          # Posts JSON {"service": "public-api", "image": "<image>", "tag": "<tag>", "sha": "<sha>"} to webhook URL
+          PAYLOAD=$(jq -nc \
+            --arg service "public-api" \
+            --arg image "$IMAGE" \
+            --arg tag "$IMAGE_TAG" \
+            --arg sha "$GITHUB_SHA" \
+            '{service: $service, image: $image, tag: $tag, sha: $sha}')
+          curl --fail-with-body --silent --show-error \
+            --retry 3 --retry-delay 5 --max-time 60 \
+            -X POST "$WEBHOOK_URL" \
+            -H "Authorization: Bearer $WEBHOOK_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d "$PAYLOAD"
 
-      - name: Fill in the new image ID in the Amazon ECS task definition
-        id: task-def
-        uses: aws-actions/amazon-ecs-render-task-definition@v1
-        with:
-          task-definition: "${{ env.WORK_DIR }}/task-definition.json"
-          container-name: ${{ env.CONTAINER_NAME }}
-          image: ${{ steps.build-image.outputs.image }}
-
-      - name: Deploy Amazon ECS task definition
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v1.4.10
-        with:
-          task-definition: ${{ steps.task-def.outputs.task-definition }}
-          service: ${{ env.ECS_SERVICE }}
-          cluster: ${{ env.ECS_CLUSTER }}
-          wait-for-service-stability: true
+      - name: Verify on-prem Docker Swarm deploy
+        env:
+          WEBHOOK_URL: ${{ vars.SWARM_WEBHOOK_URL }}
+          WEBHOOK_TOKEN: ${{ secrets.SWARM_WEBHOOK_TOKEN }}
+          IMAGE_TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          # Polls GET <webhook>?service=public-api&tag=<tag>; expects JSON {"state": "...", "tag": "..."}
+          for i in $(seq 1 30); do
+            RESPONSE=$(curl --silent --show-error --max-time 30 -G "$WEBHOOK_URL" \
+              -H "Authorization: Bearer $WEBHOOK_TOKEN" \
+              --data-urlencode "service=public-api" \
+              --data-urlencode "tag=$IMAGE_TAG" || true)
+            STATE=$(echo "$RESPONSE" | jq -r '.state // empty' 2>/dev/null || true)
+            RUNNING_TAG=$(echo "$RESPONSE" | jq -r '.tag // empty' 2>/dev/null || true)
+            echo "Attempt $i: state=${STATE:-unknown} tag=${RUNNING_TAG:-unknown}"
+            if [ "$STATE" = "completed" ] && [ "$RUNNING_TAG" = "$IMAGE_TAG" ]; then
+              echo "Swarm deploy of $IMAGE_TAG succeeded"
+              exit 0
+            fi
+            if [ "$STATE" = "failed" ] || [ "$STATE" = "rollback_completed" ]; then
+              echo "::error::Swarm deploy of $IMAGE_TAG failed: $RESPONSE"
+              exit 1
+            fi
+            sleep 10
+          done
+          echo "::error::Timed out waiting for swarm to deploy $IMAGE_TAG"
+          exit 1

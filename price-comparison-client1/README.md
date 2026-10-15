@@ -2,12 +2,25 @@
 
 ## Intro
 
+#### Requirements
+
+```text
+node >= 24.x LTS
+```
 
 ## Project setup
 ```
-source vue-env/bin/activate
-nvm use 18
+python -m venv vue-env
+source ./vue-env/bin/activate
+# on Windows: .\vue-env\Scripts\activate.bat
 npm install
+```
+
+#### add environment variables (or create .env file)
+
+```
+GOOGLE_CLIENT_ID=
+VUE_APP_API_URL="http://localhost:8080"
 ```
 
 Edit host in src/http-client.ts
