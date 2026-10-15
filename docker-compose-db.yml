@@ -1,0 +1,26 @@
+# Local development: PostgreSQL + API + client, built from source.
+# On a fresh start (empty volume) the API runs the Flyway migrations, which create
+# the schema and insert the seed data (db/migration/public/*.sql).
+#   docker compose up --build        start
+#   docker compose down -v           reset the database
+#   docker compose -f docker-compose-db.yml up --build        start only database
+# Deployment uses docker-stack.yml (Swarm, no database).
+services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-price_comparison}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  db-data:

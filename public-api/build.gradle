@@ -64,9 +64,23 @@ jar {
     }
 }
 
+// Env vars win; .env in this directory is used as a fallback
+def dotenv = [:]
+def dotenvFile = file('.env')
+if (dotenvFile.exists()) {
+    dotenvFile.eachLine { line ->
+        def l = line.trim()
+        if (l && !l.startsWith('#') && l.contains('=')) {
+            dotenv[l.substring(0, l.indexOf('=')).trim()] = l.substring(l.indexOf('=') + 1).trim()
+        }
+    }
+}
+def envVar = { String name, String defaultValue = null -> System.getenv(name) ?: dotenv[name] ?: defaultValue }
+
 flyway {
-    //url = ''
-    //user = ''
-    //password = ''
-    //schemas = ['']
+    url = envVar('DB_URL')
+    user = envVar('DB_USERNAME')
+    password = envVar('DB_PASSWORD')
+    schemas = [envVar('DB_SCHEMA', 'public')] as String[]
+    locations = ['classpath:db/migration/' + envVar('DB_SCHEMA', 'public')] as String[]
 }

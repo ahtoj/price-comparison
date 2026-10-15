@@ -4,7 +4,7 @@ set -euo pipefail
 cd "$(dirname "$0")"
 
 ENV_FILE=".env"
-JAR_FILE="build/libs/public-api-1.0.jar"
+JAR_FILE="build/libs/public-api-1.0.0.jar"
 
 [ -f "$ENV_FILE" ] || { echo "ERROR: $ENV_FILE not found in $(pwd)" >&2; exit 1; }
 [ -f "$JAR_FILE" ] || { echo "ERROR: $JAR_FILE not found. Build it with: ./gradlew bootJar" >&2; exit 1; }
