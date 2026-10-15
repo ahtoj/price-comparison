@@ -22,7 +22,7 @@ FROM eclipse-temurin:17-jre-jammy AS deploy
 
 ARG APP_ENV
 ARG APP_NAME="public-api"
-ARG APP_VERSION="1.0"
+ARG APP_VERSION="1.0.0"
 ARG JAR_FILE="${APP_NAME}-${APP_VERSION}.jar"
 ARG WORK_DIR="/home/javauser"
 

@@ -23,16 +23,9 @@ AWS_ACCESS_KEY_ID=
 AWS_SECRET_ACCESS_KEY=
 ```
 
-#### update flyway configuration in to gradle
+#### flyway configuration
 
-```
-flyway {
-    url = 'jdbc:postgresql://mmdb.shopleech.com:9097/jpa_demo'
-    user = ''
-    password = ''
-    schemas = ['public']
-}
-```
+Flyway (both the Gradle plugin and Spring on startup) reads `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` and `DB_SCHEMA` from the environment (Gradle falls back to `.env`). Migrations are loaded from `db/migration/<DB_SCHEMA>`.
 
 #### migrate db
 

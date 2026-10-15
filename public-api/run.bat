@@ -3,7 +3,7 @@ setlocal EnableDelayedExpansion
 cd /d "%~dp0"
 
 set "ENV_FILE=.env"
-set "JAR_FILE=build\libs\public-api-1.0.jar"
+set "JAR_FILE=build\libs\public-api-1.0.0.jar"
 
 if not exist "%ENV_FILE%" (
     echo ERROR: %ENV_FILE% not found in %CD%
